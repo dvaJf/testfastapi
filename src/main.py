@@ -1,6 +1,7 @@
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from src.auth.router import router as auth_router
+from src.races.router import router as races_router
 from src.auth.utils import create_first_admin
 from src.config import settings
 from src.database import engine, Base
@@ -20,3 +21,4 @@ async def lifespan(app: FastAPI):
 app = FastAPI(lifespan=lifespan)
 
 app.include_router(auth_router, prefix="/auth")
+app.include_router(races_router, prefix="/races")
