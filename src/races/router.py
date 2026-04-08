@@ -4,29 +4,20 @@ from src.database import get_session
 from src.auth.service import fastapi_users
 from src.auth.models import User
 from src.races import service
-from src.races.schemas import RaceShort, RaceOut, RaceResultsOut, RaceCreate
+from src.races.schemas import RaceShort, RaceOut, RaceResultsOut, RaceCreate, SetResultsIn, RaceUpdate
 current_user = fastapi_users.current_user()
 router = APIRouter()
 
-
 @router.get("/", response_model=list[RaceShort])
 async def list_races(session: AsyncSession = Depends(get_session)):
-    races = await service.get_all_races(session)
-    
-    result = []
-    for race in races:
-        count = await service.get_count_users(race.id, session)
-        result.append(RaceShort.model_validate({
-            "id": race.id,
-            "name": race.name,
-            "race": race.race,
-            "time": race.time,
-            "status": race.status,
-            "maxuser": race.maxuser,
+    rows = await service.get_all_races(session)
+    return [
+        RaceShort.model_validate({
+            **race.__dict__,
             "users": count
-        }))
-    
-    return result
+        })
+        for race, count in rows
+    ]
 
 @router.post("/", response_model=RaceOut, status_code=status.HTTP_201_CREATED)
 async def create_race(
@@ -41,7 +32,7 @@ async def create_race(
         time=race_data.time,
         maxuser=race_data.maxuser,
         status=race_data.status,
-        created_by=str(user.id),
+        created_by=user.id,
         session=session
     )
     
@@ -81,6 +72,7 @@ async def get_participants(race_id: int, session: AsyncSession = Depends(get_ses
     return [
         {
             "user_id": p.user_id,
+            "username": p.user.email,
         }
         for p in participants
     ]
@@ -97,7 +89,7 @@ async def get_results(race_id: int, session: AsyncSession = Depends(get_session)
         "results": [
             {
                 "user_id": r.user_id,
-                "username": r.user.username,
+                "username": r.user.email,
                 "position": r.position
             }
             for r in results
@@ -111,7 +103,7 @@ async def register(
     user: User = Depends(current_user),
     session: AsyncSession = Depends(get_session)
 ):
-    await service.register_user(race_id, str(user.id), session)
+    await service.register_user(race_id, user.id, session)
     return {"message": "registered"}
 
 
@@ -121,4 +113,36 @@ async def unregister(
     user: User = Depends(current_user),
     session: AsyncSession = Depends(get_session)
 ):
-    await service.unregister_user(race_id, str(user.id), session)
+    await service.unregister_user(race_id, user.id, session)
+
+
+@router.post("/{race_id}/results", status_code=status.HTTP_200_OK)
+async def set_results(
+    race_id: int,
+    data: SetResultsIn,
+    user: User = Depends(current_user),
+    session: AsyncSession = Depends(get_session)
+):
+    if not user.is_superuser:
+        raise ForbiddenException()
+    
+    await service.set_results(race_id, data.results, session)
+    return {"message": "Результаты сохранены"}
+
+@router.patch("/{race_id}", response_model=RaceOut)
+async def update_race(
+    race_id: int,
+    data: RaceUpdate,
+    user: User = Depends(current_user),
+    session: AsyncSession = Depends(get_session)
+):
+    if not user.is_superuser:
+        raise ForbiddenException()
+
+    race = await service.update_race(race_id, data.model_dump(exclude_none=True), session)
+    count = await service.get_count_users(race_id, session)
+
+    return RaceOut.model_validate({
+        **race.__dict__,
+        "users": count
+    })

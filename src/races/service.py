@@ -3,24 +3,30 @@ from sqlalchemy import select, func
 from sqlalchemy.orm import selectinload
 from datetime import datetime
 from src.races.models import Race, RaceResult
+from typing import Optional
 from src.races.exceptions import (
     RaceNotFoundException,
     AlreadyRegisteredException,
     NotRegisteredException,
     RaceFullException,
     RegistrationClosedException,
+    ResutException
 )
 
 async def get_all_races(session: AsyncSession):
-    query = select(Race)
+    query = (
+        select(Race, func.count(RaceResult.id).label("users_count"))
+        .outerjoin(RaceResult, Race.id == RaceResult.race_id)
+        .group_by(Race.id)
+    )
     result = await session.execute(query)
-    return result.scalars().all()
+    return result.tuples().all()
 
 async def get_race(id: int, session: AsyncSession):
     result = await session.execute(select(Race).where(Race.id == id))
     race = result.scalar_one_or_none()
     if race is None:
-        raise RaceNotFoundException
+        raise RaceNotFoundException()
     return race
 
 async def get_count_users(id: int, session: AsyncSession):
@@ -30,7 +36,7 @@ async def get_count_users(id: int, session: AsyncSession):
     )
     return result.scalar()
 
-async def create_race(name: str, race: str, about: Optional[str], time: datetime, maxuser: int, status: str, created_by: str, session: AsyncSession):
+async def create_race(name: str, race: str, about: Optional[str], time: datetime, maxuser: int, status: str, created_by: int, session: AsyncSession):
     new_race = Race(
         name=name,
         race=race,
@@ -63,11 +69,11 @@ async def get_results(id: int, session: AsyncSession):
     )
     return result.scalars().all()
 
-async def register_user(id: int, user_id: str, session: AsyncSession):
+async def register_user(id: int, user_id: int, session: AsyncSession):
     race = await get_race(id, session)
 
     if race.status != "Регистрация":
-        raise RegistrationClosedException
+        raise RegistrationClosedException()
     
     current = await get_count_users(id, session)
     if current >= race.maxuser:
@@ -79,19 +85,20 @@ async def register_user(id: int, user_id: str, session: AsyncSession):
         .where(RaceResult.user_id == user_id)
     )
     if existing.scalar_one_or_none():
-        raise AlreadyRegisteredException
+        raise AlreadyRegisteredException()
 
     race_result = RaceResult(race_id=id, user_id=user_id)
     session.add(race_result)
+    race.users += 1
     await session.commit()
     return race_result
 
 
-async def unregister_user(id: int, user_id: str, session: AsyncSession):
+async def unregister_user(id: int, user_id: int, session: AsyncSession):
     race = await get_race(id, session)
     
     if race.status != "Регистрация":
-        raise RegistrationClosedException
+        raise RegistrationClosedException()
 
     result = await session.execute(
         select(RaceResult)
@@ -100,7 +107,43 @@ async def unregister_user(id: int, user_id: str, session: AsyncSession):
     )
     race_result = result.scalar_one_or_none()
     if race_result is None:
-        raise NotRegisteredException
-
+        raise NotRegisteredException()
+    race.users = max(0, race.users - 1)
     await session.delete(race_result)
     await session.commit()
+
+async def set_results(race_id: int, results: list, session: AsyncSession):
+    race = await get_race(race_id, session)
+    
+    if race.status != "Завершена":
+        raise ResutException()
+
+    positions = [r.position for r in results]
+    if len(positions) != len(set(positions)):
+        raise ResutException()
+
+    for item in results:
+        result = await session.execute(
+            select(RaceResult)
+            .where(RaceResult.race_id == race_id)
+            .where(RaceResult.user_id == item.user_id)
+        )
+        race_result = result.scalar_one_or_none()
+
+        if race_result is None:
+            raise ResutException()
+
+        race_result.position = item.position
+
+    await session.commit()
+
+async def update_race(race_id: int, data: dict, session: AsyncSession):
+    race = await get_race(race_id, session)
+
+    for field, value in data.items():
+        if value is not None:
+            setattr(race, field, value)
+
+    await session.commit()
+    await session.refresh(race)
+    return race

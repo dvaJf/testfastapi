@@ -19,3 +19,7 @@ class RaceFullException(HTTPException):
 class RegistrationClosedException(HTTPException):
     def __init__(self):
         super().__init__(status_code=400, detail="Registration closed")
+
+class ResutException(HTTPException):
+    def __init__(self):
+        super().__init__(status_code=400, detail="Resut Exception")

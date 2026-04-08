@@ -1,7 +1,6 @@
-import uuid
 from fastapi_users.schemas import BaseUser, BaseUserCreate, BaseUserUpdate
 
-class UserRead(BaseUser[uuid.UUID]):
+class UserRead(BaseUser[int]):
     score: int
 
 class UserCreate(BaseUserCreate):

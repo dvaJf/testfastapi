@@ -44,3 +44,18 @@ class RaceResultsOut(BaseModel):
     race_id: int
     race_name: str
     results: list[RaceResultOut]
+
+class SetResultItem(BaseModel):
+    user_id: int
+    position: int
+
+class SetResultsIn(BaseModel):
+    results: list[SetResultItem]
+
+class RaceUpdate(BaseModel):
+    name: Optional[str] = None
+    race: Optional[str] = None
+    about: Optional[str] = None
+    time: Optional[datetime] = None
+    maxuser: Optional[int] = None
+    status: Optional[str] = None

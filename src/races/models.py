@@ -1,7 +1,6 @@
 from sqlalchemy import Column, Integer, String, DateTime, ForeignKey
 from src.database import Base
 from sqlalchemy.orm import relationship
-import uuid
 
 class Race(Base):
     __tablename__ = "races"
@@ -13,7 +12,7 @@ class Race(Base):
     users = Column(Integer, default=0)
     status = Column(String)
     about = Column(String)
-    created_by = Column(String(36), ForeignKey("user.id"), nullable=False)
+    created_by = Column(Integer, ForeignKey("user.id"), nullable=False)
     creator = relationship(
         "User",
         back_populates="created_races", 
@@ -29,7 +28,7 @@ class RaceResult(Base):
     __tablename__ = "raceresult"
     id = Column(Integer, primary_key=True, autoincrement=True)
     race_id = Column(Integer, ForeignKey("races.id"), nullable=False)
-    user_id = Column(String(36), ForeignKey("user.id"), nullable=False)
+    user_id = Column(Integer, ForeignKey("user.id"), nullable=False)
     position = Column(Integer, nullable=True)
     race = relationship(
         "Race",

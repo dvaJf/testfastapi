@@ -1,10 +1,8 @@
-import uuid
-
 from fastapi import Depends
 from fastapi_users import FastAPIUsers
 from fastapi_users.authentication import AuthenticationBackend, BearerTransport, JWTStrategy
 from fastapi_users.db import SQLAlchemyUserDatabase
-from fastapi_users.manager import BaseUserManager, UUIDIDMixin
+from fastapi_users.manager import BaseUserManager, IntegerIDMixin  
 from sqlalchemy.ext.asyncio import AsyncSession
 from src.auth.config import SECRET
 from src.auth.models import User
@@ -15,7 +13,7 @@ async def get_user_db(session: AsyncSession = Depends(get_session)):
     yield SQLAlchemyUserDatabase(session, User)
 
 
-class UserManager(UUIDIDMixin, BaseUserManager[User, uuid.UUID]):
+class UserManager(IntegerIDMixin, BaseUserManager[User, int]):
     reset_password_token_secret = SECRET
     verification_token_secret = SECRET
 
@@ -30,4 +28,4 @@ auth_backend = AuthenticationBackend(
     get_strategy=lambda: JWTStrategy(secret=SECRET, lifetime_seconds=3600),
 )
 
-fastapi_users = FastAPIUsers[User, uuid.UUID](get_user_manager, [auth_backend])
+fastapi_users = FastAPIUsers[User, int](get_user_manager, [auth_backend])
