@@ -6,6 +6,8 @@ class Settings(BaseSettings):
     SECRET: str = "secret"
     SECRET_REFRESH: str = "secret_refresh"
     FIRST_ADMIN_EMAIL: str | None = None
+    FIRST_ADMIN_PASSWORD: str = "admin123"
+    
     class Config:
         env_file = ".env"
 

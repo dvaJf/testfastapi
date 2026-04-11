@@ -5,26 +5,19 @@ from src.auth.service import fastapi_users
 from src.auth.models import User
 from src.races import service
 from src.races.schemas import RaceShort, RaceOut, RaceResultsOut, RaceCreate, SetResultsIn, RaceUpdate
+from src.exceptions import ForbiddenException
 current_user = fastapi_users.current_user()
 router = APIRouter()
 
 @router.get("/", response_model=list[RaceShort])
 async def list_races(session: AsyncSession = Depends(get_session)):
-    rows = await service.get_all_races(session)
-    return [
-        RaceShort.model_validate({
-            **race.__dict__,
-            "users": count
-        })
-        for race, count in rows
-    ]
+    races = await service.get_all_races(session)
+    return [RaceShort.model_validate(race) for race in races]
 
 @router.post("/", response_model=RaceOut, status_code=status.HTTP_201_CREATED)
-async def create_race(
-    race_data: RaceCreate,
-    user: User = Depends(current_user),
-    session: AsyncSession = Depends(get_session)
-):
+async def create_race(race_data: RaceCreate, user: User = Depends(current_user), session: AsyncSession = Depends(get_session)):
+    if not user.is_verified:
+        raise ForbiddenException()
     race = await service.create_race(
         name=race_data.name,
         race=race_data.race,
@@ -36,32 +29,12 @@ async def create_race(
         session=session
     )
     
-    return RaceOut.model_validate({
-        "id": race.id,
-        "name": race.name,
-        "race": race.race,
-        "about": race.about,
-        "time": race.time,
-        "status": race.status,
-        "maxuser": race.maxuser,
-        "users": 0
-    })
+    return RaceOut.model_validate(race) 
 
 @router.get("/{race_id}", response_model=RaceOut)
 async def get_race(race_id: int, session: AsyncSession = Depends(get_session)):
     race = await service.get_race(race_id, session)
-    count = await service.get_count_users(race_id, session)
-    
-    return RaceOut.model_validate({
-        "id": race.id,
-        "name": race.name,
-        "race": race.race,
-        "about": race.about,
-        "time": race.time,
-        "status": race.status,
-        "maxuser": race.maxuser,
-        "users": count
-    })
+    return RaceOut.model_validate(race)
 
 
 @router.get("/{race_id}/all_users")
@@ -123,26 +96,18 @@ async def set_results(
     user: User = Depends(current_user),
     session: AsyncSession = Depends(get_session)
 ):
-    if not user.is_superuser:
+    race = await service.get_race(race_id, session)
+    if not (user.is_superuser or (user.is_verified and race.created_by == user.id)):
         raise ForbiddenException()
     
     await service.set_results(race_id, data.results, session)
     return {"message": "Результаты сохранены"}
 
 @router.patch("/{race_id}", response_model=RaceOut)
-async def update_race(
-    race_id: int,
-    data: RaceUpdate,
-    user: User = Depends(current_user),
-    session: AsyncSession = Depends(get_session)
-):
-    if not user.is_superuser:
+async def update_race(race_id: int, data: RaceUpdate, user: User = Depends(current_user), session: AsyncSession = Depends(get_session)):
+    race = await service.get_race(race_id, session)
+    if not (user.is_superuser or (user.is_verified and race.created_by == user.id)):
         raise ForbiddenException()
 
     race = await service.update_race(race_id, data.model_dump(exclude_none=True), session)
-    count = await service.get_count_users(race_id, session)
-
-    return RaceOut.model_validate({
-        **race.__dict__,
-        "users": count
-    })
+    return RaceOut.model_validate(race)

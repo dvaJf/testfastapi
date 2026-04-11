@@ -1,6 +1,7 @@
-from pydantic import BaseModel
+from pydantic import BaseModel,  ConfigDict
 from datetime import datetime
-from typing import Optional
+from typing import Optional,Literal
+RaceStatus = Literal["Регистрация", "Завершена", "Отменена"]
 
 class RaceShort(BaseModel):
     id: int
@@ -10,8 +11,7 @@ class RaceShort(BaseModel):
     status: str
     maxuser: int
     users: int
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 class RaceOut(BaseModel):
     id: int
@@ -22,8 +22,7 @@ class RaceOut(BaseModel):
     status: str
     maxuser: int
     users: int
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 class RaceCreate(BaseModel):
     name: str
@@ -31,14 +30,13 @@ class RaceCreate(BaseModel):
     about: Optional[str] = None
     time: datetime
     maxuser: int = 20
-    status: str = "Регистрация"
+    status: RaceStatus = "Регистрация"
 
 class RaceResultOut(BaseModel):
     user_id: int
     username: str
     position: Optional[int]    
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
         
 class RaceResultsOut(BaseModel):
     race_id: int
@@ -58,4 +56,4 @@ class RaceUpdate(BaseModel):
     about: Optional[str] = None
     time: Optional[datetime] = None
     maxuser: Optional[int] = None
-    status: Optional[str] = None
+    status: Optional[RaceStatus] = None

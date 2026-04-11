@@ -8,4 +8,3 @@ class User(SQLAlchemyBaseUserTable[int], Base):
     score = Column(Integer, default=0)
     race_results = relationship("RaceResult", back_populates="user", foreign_keys="RaceResult.user_id")
     created_races = relationship("Race", back_populates="creator", foreign_keys="Race.created_by")
-    

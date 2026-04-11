@@ -1,5 +1,5 @@
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, func
+from sqlalchemy import select, update
 from sqlalchemy.orm import selectinload
 from datetime import datetime
 from src.races.models import Race, RaceResult
@@ -14,13 +14,8 @@ from src.races.exceptions import (
 )
 
 async def get_all_races(session: AsyncSession):
-    query = (
-        select(Race, func.count(RaceResult.id).label("users_count"))
-        .outerjoin(RaceResult, Race.id == RaceResult.race_id)
-        .group_by(Race.id)
-    )
-    result = await session.execute(query)
-    return result.tuples().all()
+    result = await session.execute(select(Race))
+    return result.scalars().all()
 
 async def get_race(id: int, session: AsyncSession):
     result = await session.execute(select(Race).where(Race.id == id))
@@ -28,13 +23,6 @@ async def get_race(id: int, session: AsyncSession):
     if race is None:
         raise RaceNotFoundException()
     return race
-
-async def get_count_users(id: int, session: AsyncSession):
-    result = await session.execute(
-        select(func.count())
-        .where(RaceResult.race_id == id)
-    )
-    return result.scalar()
 
 async def create_race(name: str, race: str, about: Optional[str], time: datetime, maxuser: int, status: str, created_by: int, session: AsyncSession):
     new_race = Race(
@@ -74,10 +62,9 @@ async def register_user(id: int, user_id: int, session: AsyncSession):
 
     if race.status != "Регистрация":
         raise RegistrationClosedException()
-    
-    current = await get_count_users(id, session)
-    if current >= race.maxuser:
-        raise RaceFullException
+
+    if race.users >= race.maxuser:
+        raise RaceFullException()
 
     existing = await session.execute(
         select(RaceResult)
@@ -89,7 +76,9 @@ async def register_user(id: int, user_id: int, session: AsyncSession):
 
     race_result = RaceResult(race_id=id, user_id=user_id)
     session.add(race_result)
-    race.users += 1
+    await session.execute(
+        update(Race).where(Race.id == id).values(users=Race.users + 1)
+    )
     await session.commit()
     return race_result
 
@@ -108,7 +97,9 @@ async def unregister_user(id: int, user_id: int, session: AsyncSession):
     race_result = result.scalar_one_or_none()
     if race_result is None:
         raise NotRegisteredException()
-    race.users = max(0, race.users - 1)
+    await session.execute(
+        update(Race).where(Race.id == id).values(users=Race.users - 1)
+    )
     await session.delete(race_result)
     await session.commit()
 
