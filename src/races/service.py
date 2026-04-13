@@ -4,14 +4,7 @@ from sqlalchemy.orm import selectinload
 from datetime import datetime
 from src.races.models import Race, RaceResult
 from typing import Optional
-from src.races.exceptions import (
-    RaceNotFoundException,
-    AlreadyRegisteredException,
-    NotRegisteredException,
-    RaceFullException,
-    RegistrationClosedException,
-    ResutException
-)
+from src.races.exceptions import *
 
 async def get_all_races(session: AsyncSession):
     result = await session.execute(select(Race))

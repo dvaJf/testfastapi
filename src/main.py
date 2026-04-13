@@ -5,6 +5,7 @@ from src.races.router import router as races_router
 from src.auth.utils import create_first_admin
 from src.config import settings
 from src.database import engine, Base
+from fastapi.middleware.cors import CORSMiddleware
 
 
 @asynccontextmanager
@@ -19,6 +20,12 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(lifespan=lifespan)
-
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 app.include_router(auth_router, prefix="/auth")
 app.include_router(races_router, prefix="/races",tags=["races"])

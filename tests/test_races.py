@@ -1,35 +1,29 @@
 import pytest
-from httpx import AsyncClient
 
 pytestmark = pytest.mark.asyncio
 
 RACE_PAYLOAD = {
-    "name": "Гран-при Монако",
-    "race": "Monaco",
-    "about": "Самая красивая трасса",
-    "time": "2025-05-25T14:00:00",
+    "name": "грани при Монако",
+    "race": "монако",
+    "about": "о трасе",
+    "time": "2025-05-25",
     "maxuser": 5,
     "status": "Регистрация",
 }
 
-
-# ---------------------------------------------------------------------------
-# CRUD
-# ---------------------------------------------------------------------------
-
 class TestListRaces:
-    async def test_list_empty(self, client: AsyncClient):
+    async def test_list_empty(self, client):
         resp = await client.get("/races/")
         assert resp.status_code == 200
         assert resp.json() == []
 
-    async def test_list_returns_created_race(self, client: AsyncClient, sample_race: dict):
+    async def test_list_returns_created_race(self, client, sample_race):
         resp = await client.get("/races/")
         assert resp.status_code == 200
         ids = [r["id"] for r in resp.json()]
         assert sample_race["id"] in ids
 
-    async def test_list_race_shape(self, client: AsyncClient, sample_race: dict):
+    async def test_list_race_shape(self, client, sample_race):
         resp = await client.get("/races/")
         race = next(r for r in resp.json() if r["id"] == sample_race["id"])
         for field in ("id", "name", "race", "time", "status", "maxuser", "users"):
@@ -37,45 +31,45 @@ class TestListRaces:
 
 
 class TestGetRace:
-    async def test_get_existing(self, client: AsyncClient, sample_race: dict):
+    async def test_get_existing(self, client, sample_race):
         resp = await client.get(f"/races/{sample_race['id']}")
         assert resp.status_code == 200
         assert resp.json()["id"] == sample_race["id"]
         assert resp.json()["about"] is not None
 
-    async def test_get_nonexistent(self, client: AsyncClient):
+    async def test_get_nonexistent(self, client):
         resp = await client.get("/races/99999")
         assert resp.status_code == 404
 
 
 class TestCreateRace:
-    async def test_create_as_superuser(self, client: AsyncClient, superuser: dict):
+    async def test_create_as_superuser(self, client, superuser):
         resp = await client.post("/races/", json=RACE_PAYLOAD, headers=superuser["headers"])
         assert resp.status_code == 201
         data = resp.json()
         assert data["name"] == RACE_PAYLOAD["name"]
         assert data["users"] == 0
 
-    async def test_create_as_unverified_user(self, client: AsyncClient, registered_user: dict):
+    async def test_create_as_unverified_user(self, client, registered_user):
         resp = await client.post("/races/", json=RACE_PAYLOAD, headers=registered_user["headers"])
         assert resp.status_code == 403
 
-    async def test_create_as_verified_user(self, client: AsyncClient, verified_user: dict):
+    async def test_create_as_verified_user(self, client, verified_user):
         resp = await client.post("/races/", json=RACE_PAYLOAD, headers=verified_user["headers"])
         assert resp.status_code == 201
 
-    async def test_create_without_auth(self, client: AsyncClient):
+    async def test_create_without_auth(self, client):
         resp = await client.post("/races/", json=RACE_PAYLOAD)
         assert resp.status_code == 401
 
-    async def test_create_missing_required_field(self, client: AsyncClient, superuser: dict):
+    async def test_create_missing_required_field(self, client, superuser):
         bad = {k: v for k, v in RACE_PAYLOAD.items() if k != "name"}
         resp = await client.post("/races/", json=bad, headers=superuser["headers"])
         assert resp.status_code == 422
 
 
 class TestUpdateRace:
-    async def test_update_as_creator(self, client: AsyncClient, verified_user: dict):
+    async def test_update_as_creator(self, client, verified_user):
         created = await client.post("/races/", json=RACE_PAYLOAD, headers=verified_user["headers"])
         race_id = created.json()["id"]
         resp = await client.patch(
@@ -86,7 +80,7 @@ class TestUpdateRace:
         assert resp.status_code == 200
         assert resp.json()["name"] == "Новое название"
 
-    async def test_update_as_non_creator(self, client: AsyncClient, superuser: dict, verified_user: dict):
+    async def test_update_as_non_creator(self, client, superuser, verified_user):
         created = await client.post("/races/", json=RACE_PAYLOAD, headers=superuser["headers"])
         race_id = created.json()["id"]
         resp = await client.patch(
@@ -96,7 +90,7 @@ class TestUpdateRace:
         )
         assert resp.status_code == 403
 
-    async def test_update_as_superuser(self, client: AsyncClient, superuser: dict, verified_user: dict):
+    async def test_update_as_superuser(self, client, superuser, verified_user):
         created = await client.post("/races/", json=RACE_PAYLOAD, headers=verified_user["headers"])
         race_id = created.json()["id"]
         resp = await client.patch(
@@ -107,7 +101,7 @@ class TestUpdateRace:
         assert resp.status_code == 200
         assert resp.json()["status"] == "Завершена"
 
-    async def test_update_partial_fields(self, client: AsyncClient, superuser: dict):
+    async def test_update_partial_fields(self, client, superuser):
         created = await client.post("/races/", json=RACE_PAYLOAD, headers=superuser["headers"])
         race_id = created.json()["id"]
         resp = await client.patch(
@@ -117,15 +111,10 @@ class TestUpdateRace:
         )
         assert resp.status_code == 200
         assert resp.json()["maxuser"] == 30
-        assert resp.json()["name"] == RACE_PAYLOAD["name"]  # unchanged
-
-
-# ---------------------------------------------------------------------------
-# Registration
-# ---------------------------------------------------------------------------
+        assert resp.json()["name"] == RACE_PAYLOAD["name"]
 
 class TestRegisterForRace:
-    async def test_register_success(self, client: AsyncClient, sample_race: dict, registered_user: dict):
+    async def test_register_success(self, client, sample_race, registered_user):
         resp = await client.post(
             f"/races/{sample_race['id']}/register",
             headers=registered_user["headers"],
@@ -133,17 +122,17 @@ class TestRegisterForRace:
         assert resp.status_code == 201
         assert resp.json()["message"] == "registered"
 
-    async def test_register_twice(self, client: AsyncClient, sample_race: dict, registered_user: dict):
+    async def test_register_twice(self, client, sample_race, registered_user):
         await client.post(f"/races/{sample_race['id']}/register", headers=registered_user["headers"])
         resp = await client.post(f"/races/{sample_race['id']}/register", headers=registered_user["headers"])
         assert resp.status_code == 400
         assert "Already registered" in resp.json()["detail"]
 
-    async def test_register_nonexistent_race(self, client: AsyncClient, registered_user: dict):
+    async def test_register_nonexistent_race(self, client, registered_user):
         resp = await client.post("/races/99999/register", headers=registered_user["headers"])
         assert resp.status_code == 404
 
-    async def test_register_when_full(self, client: AsyncClient, superuser: dict):
+    async def test_register_when_full(self, client, superuser):
         """Create a race with maxuser=1, fill it, then check the next user gets 400."""
         race_resp = await client.post(
             "/races/",
@@ -152,10 +141,8 @@ class TestRegisterForRace:
         )
         race_id = race_resp.json()["id"]
 
-        # Register first user (superuser itself)
         await client.post(f"/races/{race_id}/register", headers=superuser["headers"])
 
-        # Register second user
         await client.post(
             "/auth/register",
             json={"email": "user2@example.com", "password": "Pass123!", "score": 0},
@@ -171,7 +158,7 @@ class TestRegisterForRace:
         assert resp.status_code == 400
         assert "full" in resp.json()["detail"].lower()
 
-    async def test_register_when_closed(self, client: AsyncClient, superuser: dict, registered_user: dict):
+    async def test_register_when_closed(self, client, superuser, registered_user):
         race_resp = await client.post(
             "/races/",
             json={**RACE_PAYLOAD, "status": "Завершена"},
@@ -182,23 +169,23 @@ class TestRegisterForRace:
         assert resp.status_code == 400
         assert "closed" in resp.json()["detail"].lower()
 
-    async def test_register_without_auth(self, client: AsyncClient, sample_race: dict):
+    async def test_register_without_auth(self, client, sample_race):
         resp = await client.post(f"/races/{sample_race['id']}/register")
         assert resp.status_code == 401
 
 
 class TestUnregisterFromRace:
-    async def test_unregister_success(self, client: AsyncClient, sample_race: dict, registered_user: dict):
+    async def test_unregister_success(self, client, sample_race, registered_user):
         await client.post(f"/races/{sample_race['id']}/register", headers=registered_user["headers"])
         resp = await client.delete(f"/races/{sample_race['id']}/unregister", headers=registered_user["headers"])
         assert resp.status_code == 204
 
-    async def test_unregister_not_registered(self, client: AsyncClient, sample_race: dict, registered_user: dict):
+    async def test_unregister_not_registered(self, client, sample_race, registered_user):
         resp = await client.delete(f"/races/{sample_race['id']}/unregister", headers=registered_user["headers"])
         assert resp.status_code == 400
         assert "Not registered" in resp.json()["detail"]
 
-    async def test_unregister_when_closed(self, client: AsyncClient, superuser: dict, registered_user: dict):
+    async def test_unregister_when_closed(self, client, superuser, registered_user):
         race_resp = await client.post("/races/", json=RACE_PAYLOAD, headers=superuser["headers"])
         race_id = race_resp.json()["id"]
         await client.post(f"/races/{race_id}/register", headers=registered_user["headers"])
@@ -207,29 +194,20 @@ class TestUnregisterFromRace:
         resp = await client.delete(f"/races/{race_id}/unregister", headers=registered_user["headers"])
         assert resp.status_code == 400
 
-
-# ---------------------------------------------------------------------------
-# Participants & Results
-# ---------------------------------------------------------------------------
-
 class TestParticipants:
-    async def test_get_participants_empty(self, client: AsyncClient, sample_race: dict):
+    async def test_get_participants_empty(self, client, sample_race):
         resp = await client.get(f"/races/{sample_race['id']}/all_users")
         assert resp.status_code == 200
         assert resp.json() == []
 
-    async def test_get_participants_after_register(
-        self, client: AsyncClient, sample_race: dict, registered_user: dict
-    ):
+    async def test_get_participants_after_register(self, client, sample_race, registered_user):
         await client.post(f"/races/{sample_race['id']}/register", headers=registered_user["headers"])
         resp = await client.get(f"/races/{sample_race['id']}/all_users")
         assert resp.status_code == 200
         assert len(resp.json()) == 1
         assert resp.json()[0]["username"] == registered_user["email"]
 
-    async def test_participant_count_in_race(
-        self, client: AsyncClient, sample_race: dict, registered_user: dict
-    ):
+    async def test_participant_count_in_race(self, client, sample_race, registered_user):
         await client.post(f"/races/{sample_race['id']}/register", headers=registered_user["headers"])
         race = await client.get(f"/races/{sample_race['id']}")
         assert race.json()["users"] == 1
@@ -243,16 +221,13 @@ class TestResults:
         await client.patch(f"/races/{race_id}", json={"status": "Завершена"}, headers=superuser["headers"])
         return race_id
 
-    async def test_get_results_empty(self, client: AsyncClient, sample_race: dict):
+    async def test_get_results_empty(self, client, sample_race):
         resp = await client.get(f"/races/{sample_race['id']}/results")
         assert resp.status_code == 200
         assert resp.json()["results"] == []
 
-    async def test_set_results_success(
-        self, client: AsyncClient, superuser: dict, registered_user: dict
-    ):
+    async def test_set_results_success(self, client, superuser, registered_user):
         race_id = await self._finish_race_with_user(client, superuser, registered_user)
-        # get user_id from participants
         parts = await client.get(f"/races/{race_id}/all_users")
         user_id = parts.json()[0]["user_id"]
 
@@ -263,9 +238,7 @@ class TestResults:
         )
         assert resp.status_code == 200
 
-    async def test_get_results_after_set(
-        self, client: AsyncClient, superuser: dict, registered_user: dict
-    ):
+    async def test_get_results_after_set(self, client, superuser, registered_user):
         race_id = await self._finish_race_with_user(client, superuser, registered_user)
         parts = await client.get(f"/races/{race_id}/all_users")
         user_id = parts.json()[0]["user_id"]
@@ -281,9 +254,7 @@ class TestResults:
         assert len(results) == 1
         assert results[0]["position"] == 1
 
-    async def test_set_results_race_not_finished(
-        self, client: AsyncClient, superuser: dict, registered_user: dict
-    ):
+    async def test_set_results_race_not_finished(self, client, superuser, registered_user):
         race_resp = await client.post("/races/", json=RACE_PAYLOAD, headers=superuser["headers"])
         race_id = race_resp.json()["id"]
         await client.post(f"/races/{race_id}/register", headers=registered_user["headers"])
@@ -297,9 +268,7 @@ class TestResults:
         )
         assert resp.status_code == 400
 
-    async def test_set_results_duplicate_positions(
-        self, client: AsyncClient, superuser: dict, registered_user: dict
-    ):
+    async def test_set_results_duplicate_positions(self, client, superuser, registered_user):
         """Two users can't share the same position."""
         race_resp = await client.post(
             "/races/", json={**RACE_PAYLOAD, "maxuser": 10}, headers=superuser["headers"]
@@ -321,9 +290,7 @@ class TestResults:
         )
         assert resp.status_code == 400
 
-    async def test_set_results_non_participant(
-        self, client: AsyncClient, superuser: dict, registered_user: dict
-    ):
+    async def test_set_results_non_participant(self, client, superuser, registered_user):
         race_id = await self._finish_race_with_user(client, superuser, registered_user)
         resp = await client.post(
             f"/races/{race_id}/results",
@@ -332,9 +299,7 @@ class TestResults:
         )
         assert resp.status_code == 400
 
-    async def test_set_results_forbidden_for_stranger(
-        self, client: AsyncClient, superuser: dict, registered_user: dict
-    ):
+    async def test_set_results_forbidden_for_stranger(self, client, superuser, registered_user):
         race_id = await self._finish_race_with_user(client, superuser, registered_user)
         parts = await client.get(f"/races/{race_id}/all_users")
         user_id = parts.json()[0]["user_id"]
@@ -342,6 +307,6 @@ class TestResults:
         resp = await client.post(
             f"/races/{race_id}/results",
             json={"results": [{"user_id": user_id, "position": 1}]},
-            headers=registered_user["headers"],  # not creator, not superuser
+            headers=registered_user["headers"],
         )
         assert resp.status_code == 403

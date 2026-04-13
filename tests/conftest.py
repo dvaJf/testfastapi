@@ -1,4 +1,3 @@
-import pytest
 import pytest_asyncio
 from httpx import AsyncClient, ASGITransport
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
@@ -43,7 +42,7 @@ async def client() -> AsyncClient:
 
 
 @pytest_asyncio.fixture
-async def registered_user(client: AsyncClient) -> dict:
+async def registered_user(client):
     payload = {"email": "user@example.com", "password": "Password123!", "score": 0}
     await client.post("/auth/register", json=payload)
     login = await client.post("/auth/login", data={"username": "user@example.com", "password": "Password123!"})
@@ -52,7 +51,7 @@ async def registered_user(client: AsyncClient) -> dict:
 
 
 @pytest_asyncio.fixture
-async def verified_user(client: AsyncClient, registered_user: dict) -> dict:
+async def verified_user(registered_user):
     """Manually flip is_verified in the DB for the registered user."""
     async with test_session_maker() as session:
         from sqlalchemy import update
@@ -63,7 +62,7 @@ async def verified_user(client: AsyncClient, registered_user: dict) -> dict:
 
 
 @pytest_asyncio.fixture
-async def superuser(client: AsyncClient) -> dict:
+async def superuser(client):
     payload = {"email": "admin@example.com", "password": "Admin123!", "score": 0}
     await client.post("/auth/register", json=payload)
     async with test_session_maker() as session:
@@ -79,7 +78,7 @@ async def superuser(client: AsyncClient) -> dict:
 
 
 @pytest_asyncio.fixture
-async def sample_race(client: AsyncClient, superuser: dict) -> dict:
+async def sample_race(client, superuser):
     payload = {
         "name": "Гран-при Монако",
         "race": "Monaco",
