@@ -33,7 +33,7 @@ async def create_race(name: str, race: str, about: Optional[str], time: datetime
         name=name,
         race=race,
         about=about,
-        time=time,
+        time=time.replace(tzinfo=None),
         maxuser=maxuser,
         status=status,
         created_by=created_by
