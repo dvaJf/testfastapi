@@ -11,6 +11,8 @@ class RaceShort(BaseModel):
     status: str
     maxuser: int
     users: int
+    created_by: int
+    creator_email: Optional[str] = None
     model_config = ConfigDict(from_attributes=True)
 
 class RaceOut(BaseModel):
@@ -22,6 +24,8 @@ class RaceOut(BaseModel):
     status: str
     maxuser: int
     users: int
+    created_by: int
+    creator_email: Optional[str] = None
     model_config = ConfigDict(from_attributes=True)
 
 class RaceCreate(BaseModel):

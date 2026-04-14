@@ -832,8 +832,8 @@
 
     <!-- FILTER BAR -->
     <div class="filter-bar">
-      <button class="filter-chip active" data-filter="all">Все гонки</button>
-      <button class="filter-chip" data-filter="Регистрация">Открытые</button>
+      <button class="filter-chip" data-filter="all">Все гонки</button>
+      <button class="filter-chip active" data-filter="Регистрация">Открытые</button>
       <button class="filter-chip" data-filter="Завершена">Завершённые</button>
       <button class="filter-chip" data-filter="Отменена">Отменённые</button>
     </div>
@@ -1268,7 +1268,7 @@ class App {
     this.state = {
       user: null,
       races: [],
-      currentFilter: 'all',
+      currentFilter: 'Регистрация',
       currentRace: null,
       editingRace: null,
       participants: new Map(),
@@ -1487,6 +1487,18 @@ class App {
     return this.state.user && (this.state.user.is_verified || this.state.user.is_superuser);
   }
 
+  canEditRace(race) {
+    if (!this.state.user) return false;
+    if (this.state.user.is_superuser) return true;
+    if (this.state.user.is_verified && race && race.created_by === this.state.user.id) return true;
+    return false;
+  }
+
+  toggleAdmin() {
+    const panel = document.getElementById('admin-panel');
+    panel.classList.toggle('visible');
+  }
+
   canSetResults(race) {
     if (!this.state.user) return false;
     if (this.state.user.is_superuser) return true;
@@ -1695,6 +1707,7 @@ class App {
           <h2>${race.name}</h2>
           <div class="race-card-meta">
             <span>📅 ${this.formatDate(race.time)}</span>
+            ${race.creator_email ? `<span>👤 ${race.creator_email}</span>` : ''}
           </div>
           <div class="race-card-footer">
             <div class="capacity-bar-wrap">
@@ -1707,12 +1720,12 @@ class App {
               </div>
             </div>
             <div style="display:flex;gap:8px;">
-              ${canEditAnyRace ? `
+              ${this.canEditRace(race) ? `
                 <button class="register-btn" onclick="app.openEditModal(${race.id}, event)" title="Редактировать">
                   ✎
                 </button>
               ` : ''}
-              ${race.status === 'Завершена' ? `
+              ${race.status === 'Завершена' && this.canEditRace(race) ? `
                 <button class="register-btn" onclick="app.openResultsModal(${race.id}, event)" title="Результаты">
                   🏆
                 </button>
@@ -1773,6 +1786,7 @@ class App {
       document.getElementById('detail-meta').innerHTML = `
         <div class="modal-meta-chip">📅 ${this.formatDate(race.time)}</div>
         <div class="modal-meta-chip">👥 ${race.users} / ${race.maxuser}</div>
+        ${race.creator_email ? `<div class="modal-meta-chip">👤 Организатор: ${race.creator_email}</div>` : ''}
         <span class="status-badge ${this.getStatusClass(race.status)}">${race.status}</span>
       `;
 
@@ -1815,7 +1829,7 @@ class App {
 
       const actions = document.getElementById('detail-actions');
       const isRegistered = this.state.registrations.has(id);
-      const canEdit = this.canEditRaces();
+      const canEdit = this.canEditRace(race);
       
       let buttons = [];
       
@@ -1831,7 +1845,7 @@ class App {
         buttons.push(`<button class="btn btn-green" onclick="app.openEditModal(${id});app.closeModal('modal-detail')">Редактировать</button>`);
       }
       
-      if (race.status === 'Завершена') {
+      if (race.status === 'Завершена' && canEdit) {
         buttons.push(`<button class="btn btn-green" onclick="app.openResultsModal(${id})">Результаты</button>`);
       }
       
@@ -1885,6 +1899,7 @@ class App {
           <h2>${race.name}</h2>
           <div class="race-card-meta">
             <span>📅 ${this.formatDate(race.time)}</span>
+            ${race.creator_email ? `<span>👤 ${race.creator_email}</span>` : ''}
           </div>
         </div>
       `).join('');

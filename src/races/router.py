@@ -11,8 +11,11 @@ router = APIRouter()
 
 @router.get("/", response_model=list[RaceShort])
 async def list_races(session: AsyncSession = Depends(get_session)):
-    races = await service.get_all_races(session)
-    return [RaceShort.model_validate(race) for race in races]
+    races = await service.get_all_races_with_creator(session)
+    return [RaceShort.model_validate({
+        **race.__dict__,
+        'creator_email': race.creator.email if race.creator else None
+    }) for race in races]
 
 @router.post("/", response_model=RaceOut, status_code=status.HTTP_201_CREATED)
 async def create_race(race_data: RaceCreate, user: User = Depends(current_user), session: AsyncSession = Depends(get_session)):
@@ -33,8 +36,11 @@ async def create_race(race_data: RaceCreate, user: User = Depends(current_user),
 
 @router.get("/{race_id}", response_model=RaceOut)
 async def get_race(race_id: int, session: AsyncSession = Depends(get_session)):
-    race = await service.get_race(race_id, session)
-    return RaceOut.model_validate(race)
+    race = await service.get_race_with_creator(race_id, session)
+    return RaceOut.model_validate({
+        **race.__dict__,
+        'creator_email': race.creator.email if race.creator else None
+    })
 
 
 @router.get("/{race_id}/all_users")

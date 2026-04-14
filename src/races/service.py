@@ -10,8 +10,23 @@ async def get_all_races(session: AsyncSession):
     result = await session.execute(select(Race))
     return result.scalars().all()
 
+async def get_all_races_with_creator(session: AsyncSession):
+    result = await session.execute(
+        select(Race).options(selectinload(Race.creator))
+    )
+    return result.scalars().all()
+
 async def get_race(id: int, session: AsyncSession):
     result = await session.execute(select(Race).where(Race.id == id))
+    race = result.scalar_one_or_none()
+    if race is None:
+        raise RaceNotFoundException()
+    return race
+
+async def get_race_with_creator(id: int, session: AsyncSession):
+    result = await session.execute(
+        select(Race).where(Race.id == id).options(selectinload(Race.creator))
+    )
     race = result.scalar_one_or_none()
     if race is None:
         raise RaceNotFoundException()
