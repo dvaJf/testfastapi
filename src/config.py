@@ -6,5 +6,6 @@ class Settings(BaseSettings):
     SECRET_REFRESH: str
     FIRST_ADMIN_EMAIL: str
     FIRST_ADMIN_PASSWORD: str
+    model_config = SettingsConfigDict(env_file=".env")
 
 settings = Settings()
