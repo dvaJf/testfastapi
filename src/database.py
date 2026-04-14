@@ -5,7 +5,7 @@ from src.config import settings
 
 class Base(DeclarativeBase):
     pass
-
+logger.info(f"Original DATABASE_URL: {settings.DATABASE_URL[:30]}...")
 DATABASE_URL = settings.DATABASE_URL.replace("postgresql://", "postgresql+asyncpg://", 1)
 
 engine = create_async_engine(settings.DATABASE_URL)
