@@ -137,6 +137,8 @@ async def update_race(race_id: int, data: dict, session: AsyncSession):
 
     for field, value in data.items():
         if value is not None:
+            if isinstance(value, datetime):
+                value = value.replace(tzinfo=None)
             setattr(race, field, value)
 
     await session.commit()
