@@ -8,6 +8,8 @@ src/races/__pycache__/
 # C extensions
 *.so
 migrations/__pycache__
+test.db
+test_db.db
 # Distribution / packaging
 .Python
 build/

@@ -734,7 +734,6 @@
     .admin-table th, .admin-table td { padding: 8px; }
   }
 </style>
-<base target="_blank">
 </head>
 <body>
 
@@ -746,7 +745,7 @@
 <!-- NAV -->
 <nav>
   <a class="nav-logo" onclick="app.navigate('home')">
-    F1<span class="nav-logo-badge">RACES</span>
+    F1<span class="nav-logo-badge">online</span>
   </a>
   <div class="nav-links" id="nav-links">
     <button class="nav-btn" id="btn-admin" style="display:none;" onclick="app.toggleAdmin()">Панель</button>
@@ -763,9 +762,8 @@
   <!-- HOME PAGE -->
   <div id="page-home">
     <section class="hero">
-      <div class="hero-tag">Сезон 2025</div>
-      <h1>Гонки.<br/><span>Скорость.</span><br/>Победа.</h1>
-      <p class="hero-sub">Регистрируйтесь на гонки, следите за результатами и участвуйте в соревнованиях по всей России.</p>
+      <h1>Гонки<br/><span>Скорость</span><br/>Победа</h1>
+      <p class="hero-sub">Регистрируйтесь на гонки, следите за результатами и участвуйте в соревнованиях.</p>
       <div class="hero-stats">
         <div>
           <div class="hero-stat-label">Гонок</div>
@@ -774,10 +772,6 @@
         <div>
           <div class="hero-stat-label">Участников</div>
           <div class="hero-stat-val" id="stat-users">—</div>
-        </div>
-        <div>
-          <div class="hero-stat-label">Городов</div>
-          <div class="hero-stat-val">7</div>
         </div>
       </div>
     </section>
@@ -1494,11 +1488,6 @@ class App {
     return false;
   }
 
-  toggleAdmin() {
-    const panel = document.getElementById('admin-panel');
-    panel.classList.toggle('visible');
-  }
-
   canSetResults(race) {
     if (!this.state.user) return false;
     if (this.state.user.is_superuser) return true;
@@ -1908,6 +1897,8 @@ class App {
 
   updateStats() {
     document.getElementById('stat-races').textContent = this.state.races.length;
+    const totalUsers = this.state.races.reduce((sum, r) => sum + r.users, 0);
+    document.getElementById('stat-users').textContent = totalUsers;
   }
 
   updateAdminStats() {
@@ -1935,7 +1926,7 @@ class App {
     document.querySelectorAll('.form-error').forEach(el => el.classList.remove('visible'));
   }
 
-  openAuthTab(tab) {
+  switchAuthTab(tab) {
     document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
     document.querySelector(`[data-tab="${tab}"]`).classList.add('active');
     document.getElementById('form-login').style.display = tab === 'login' ? 'block' : 'none';
@@ -1943,7 +1934,7 @@ class App {
   }
 
   openAuthModal(tab = 'login') {
-    this.openAuthTab(tab);
+    this.switchAuthTab(tab);
     this.openModal('modal-auth');
   }
 

@@ -4,11 +4,7 @@ from sqlalchemy.orm import selectinload
 from datetime import datetime
 from src.races.models import Race, RaceResult
 from typing import Optional
-from src.races.exceptions import *
-
-async def get_all_races(session: AsyncSession):
-    result = await session.execute(select(Race))
-    return result.scalars().all()
+from src.exceptions import *
 
 async def get_all_races_with_creator(session: AsyncSession):
     result = await session.execute(
@@ -20,7 +16,7 @@ async def get_race(id: int, session: AsyncSession):
     result = await session.execute(select(Race).where(Race.id == id))
     race = result.scalar_one_or_none()
     if race is None:
-        raise RaceNotFoundException()
+        raise NotFoundException()
     return race
 
 async def get_race_with_creator(id: int, session: AsyncSession):
@@ -29,7 +25,7 @@ async def get_race_with_creator(id: int, session: AsyncSession):
     )
     race = result.scalar_one_or_none()
     if race is None:
-        raise RaceNotFoundException()
+        raise NotFoundException()
     return race
 
 async def create_race(name: str, race: str, about: Optional[str], time: datetime, maxuser: int, status: str, created_by: int, session: AsyncSession):
@@ -69,10 +65,10 @@ async def register_user(id: int, user_id: int, session: AsyncSession):
     race = await get_race(id, session)
 
     if race.status != "Регистрация":
-        raise RegistrationClosedException()
+        raise BadRequestException()
 
     if race.users >= race.maxuser:
-        raise RaceFullException()
+        raise BadRequestException()
 
     existing = await session.execute(
         select(RaceResult)
@@ -80,7 +76,7 @@ async def register_user(id: int, user_id: int, session: AsyncSession):
         .where(RaceResult.user_id == user_id)
     )
     if existing.scalar_one_or_none():
-        raise AlreadyRegisteredException()
+        raise BadRequestException()
 
     race_result = RaceResult(race_id=id, user_id=user_id)
     session.add(race_result)
@@ -95,7 +91,7 @@ async def unregister_user(id: int, user_id: int, session: AsyncSession):
     race = await get_race(id, session)
     
     if race.status != "Регистрация":
-        raise RegistrationClosedException()
+        raise BadRequestException()
 
     result = await session.execute(
         select(RaceResult)
@@ -104,7 +100,7 @@ async def unregister_user(id: int, user_id: int, session: AsyncSession):
     )
     race_result = result.scalar_one_or_none()
     if race_result is None:
-        raise NotRegisteredException()
+        raise BadRequestException()
     await session.execute(
         update(Race).where(Race.id == id).values(users=Race.users - 1)
     )
@@ -115,11 +111,11 @@ async def set_results(race_id: int, results: list, session: AsyncSession):
     race = await get_race(race_id, session)
     
     if race.status != "Завершена":
-        raise ResutException()
+        raise BadRequestException()
 
     positions = [r.position for r in results]
     if len(positions) != len(set(positions)):
-        raise ResutException()
+        raise BadRequestException()
 
     for item in results:
         result = await session.execute(
@@ -130,7 +126,7 @@ async def set_results(race_id: int, results: list, session: AsyncSession):
         race_result = result.scalar_one_or_none()
 
         if race_result is None:
-            raise ResutException()
+            raise BadRequestException()
 
         race_result.position = item.position
 

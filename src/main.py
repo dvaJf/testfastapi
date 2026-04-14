@@ -6,7 +6,7 @@ from src.auth.utils import create_first_admin
 from src.config import settings
 from src.database import engine, Base
 from fastapi.middleware.cors import CORSMiddleware
-
+from fastapi.responses import FileResponse
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -29,3 +29,7 @@ app.add_middleware(
 )
 app.include_router(auth_router, prefix="/auth")
 app.include_router(races_router, prefix="/races",tags=["races"])
+
+@app.get("/")
+async def serve_index():
+    return FileResponse("index.html")

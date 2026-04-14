@@ -5,17 +5,29 @@ from src.auth.service import fastapi_users
 from src.auth.models import User
 from src.races import service
 from src.races.schemas import RaceShort, RaceOut, RaceResultsOut, RaceCreate, SetResultsIn, RaceUpdate
-from src.exceptions import ForbiddenException
+from src.exceptions import *
 current_user = fastapi_users.current_user()
 router = APIRouter()
 
 @router.get("/", response_model=list[RaceShort])
 async def list_races(session: AsyncSession = Depends(get_session)):
     races = await service.get_all_races_with_creator(session)
-    return [RaceShort.model_validate({
-        **race.__dict__,
-        'creator_email': race.creator.email if race.creator else None
-    }) for race in races]
+    result = []
+    for race in races:
+        race_data = {
+            "id": race.id,
+            "name": race.name,
+            "race": race.race,
+            "time": race.time,
+            "status": race.status,
+            "maxuser": race.maxuser,
+            "users": race.users,
+            "created_by": race.created_by,
+            "creator_email": race.creator.email if race.creator else None
+        }
+        result.append(RaceShort.model_validate(race_data))
+    
+    return result
 
 @router.post("/", response_model=RaceOut, status_code=status.HTTP_201_CREATED)
 async def create_race(race_data: RaceCreate, user: User = Depends(current_user), session: AsyncSession = Depends(get_session)):

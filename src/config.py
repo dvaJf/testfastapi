@@ -1,15 +1,12 @@
-from pydantic_settings import BaseSettings
-
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Settings(BaseSettings):
-    DATABASE_URL: str = "sqlite+aiosqlite:///./test.db"
-    SECRET: str = "secret"
-    SECRET_REFRESH: str = "secret_refresh"
-    FIRST_ADMIN_EMAIL: str | None = None
-    FIRST_ADMIN_PASSWORD: str = "admin123"
-    
-    class Config:
-        env_file = ".env"
+    DATABASE_URL: str
+    SECRET: str
+    SECRET_REFRESH: str
+    FIRST_ADMIN_EMAIL: str
+    FIRST_ADMIN_PASSWORD: str
+    model_config = SettingsConfigDict(env_file=".env")
 
 
 settings = Settings()
