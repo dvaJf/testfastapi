@@ -8,5 +8,4 @@ class Settings(BaseSettings):
     FIRST_ADMIN_PASSWORD: str
     model_config = SettingsConfigDict(env_file=".env")
 
-
 settings = Settings()
