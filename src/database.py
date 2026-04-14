@@ -6,6 +6,8 @@ from src.config import settings
 class Base(DeclarativeBase):
     pass
 
+DATABASE_URL = settings.DATABASE_URL.replace("postgresql://", "postgresql+asyncpg://", 1)
+
 engine = create_async_engine(settings.DATABASE_URL)
 session_maker = async_sessionmaker(engine, expire_on_commit=False)
 
