@@ -614,6 +614,7 @@
         display: flex;
         align-items: center;
         gap: 10px;
+        flex-wrap: wrap;
       }
 
       .race-card-meta span {
@@ -1435,20 +1436,10 @@
           </button>
         </div>
         <div class="hnav-item">
-  <button class="hnav-link" data-page="pilotstats" onclick="app.navigate('pilotstats')">
-    Рейтинг пилотов
-  </button>
-</div>
+          <button class="hnav-link" data-page="pilotstats" onclick="app.navigate('pilotstats')">
+            Рейтинг пилотов
+          </button>
         </div>
-
-        </div>
-        <!-- Support dropdown -->
-        
-
-        <!-- Хаб dropdown -->
-        
-          
-
         <div class="hnav-item">
           <button
             class="hnav-link"
@@ -1459,15 +1450,6 @@
             Информация
           </button>
         </div>
-        <div class="hnav-item">
-          
-          <a
-            href="#"
-            class="hnav-drop-item"
-            onclick="app.navigate('support', 'tickets')"
-            >Support Tickets</a
-          >
-      </div>
       </nav>
     </header>
 
@@ -1557,7 +1539,7 @@
           <button class="filter-chip" data-filter="Завершена">
             Завершённые
           </button>
-          <button class="filter-chip" data-filter="Отменена">Отменённые</button>
+          
         </div>
 
         <!-- RACES GRID -->
@@ -1597,6 +1579,16 @@
                 </div>
               </div>
             </div>
+            <div class="form-row" id="profile-rating-row" style="margin-top: 1rem; display: none;">
+              <div class="form-group">
+                <label class="form-label">👍 Лайков</label>
+                <div class="hero-stat-val" id="profile-likes" style="color: var(--green);">0</div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">👎 Дизлайков</label>
+                <div class="hero-stat-val" id="profile-dislikes" style="color: var(--red);">0</div>
+              </div>
+            </div>
           </div>
 
           <div class="section-header">
@@ -1628,40 +1620,6 @@
         </div>
       </div>
 
-      <!-- МЕДИА -->
-      <div id="page-media" class="page">
-        <div class="placeholder-page">
-          <h1>Медиа</h1>
-          <p>Фотографии с гонок, видеообзоры, скриншоты и стримы.</p>
-          <p style="margin-top: 2rem; color: var(--text3)"></p>
-        </div>
-      </div>
-
-      <!-- SUPPORT -->
-      <div id="page-support" class="page">
-        <div class="placeholder-page">
-          <h1>Поддержка</h1>
-          <p>
-            Здесь вы можете найти ответы на частые вопросы, руководства и
-            связаться с администрацией.
-          </p>
-          <p style="margin-top: 2rem; color: var(--text3)">
-            Выберите раздел в меню Support.
-          </p>
-        </div>
-      </div>
-
-      <!-- ХАБ -->
-      <div id="page-hub" class="page">
-        <div class="placeholder-page">
-          <h1>Хаб</h1>
-          <p>Статистика матчей, команд, игроков и турниров.</p>
-          <p style="margin-top: 2rem; color: var(--text3)">
-            Выберите интересующий раздел в выпадающем меню Хаб.
-          </p>
-        </div>
-      </div>
-
       <!-- ИНФОРМАЦИЯ -->
       <div id="page-info" class="page">
         <div class="placeholder-page">
@@ -1669,6 +1627,39 @@
           <p>О проекте, правилах</p>
           <p style="margin-top: 2rem; color: var(--text3)"></p>
         </div>
+      </div>
+
+      <!-- РЕЙТИНГ ПИЛОТОВ -->
+      <div id="page-pilotstats" class="page">
+        <section class="races-section">
+          <div class="section-header">
+            <span class="section-title">Рейтинг пилотов</span>
+            <span class="section-count" id="leaderboard-count">Загрузка...</span>
+          </div>
+          <div style="overflow-x: auto;">
+            <table class="admin-table" id="leaderboard-table">
+              <thead>
+                <tr>
+                  <th style="width: 70px;">Место</th>
+                  <th>Пилот</th>
+                  <th style="width: 100px;">Гонок</th>
+                  <th style="width: 130px;">Лучший рез.</th>
+                  <th style="width: 110px;">Очки</th>
+                </tr>
+              </thead>
+              <tbody id="leaderboard-tbody">
+                <tr>
+                  <td colspan="5" style="text-align: center; color: var(--text3); padding: 3rem;">
+                    Загрузка...
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Таблица начисления очков -->
+          
+        </section>
       </div>
     </main>
 
@@ -1719,6 +1710,7 @@
                 <tr>
                   <th>Поз.</th>
                   <th>Участник</th>
+                  <th style="text-align:right;">Очки</th>
                 </tr>
               </thead>
               <tbody id="detail-results-body"></tbody>
@@ -1739,6 +1731,34 @@
               Участники <span id="participants-count"></span>
             </div>
             <div class="participants-list" id="detail-participants"></div>
+          </div>
+
+          <!-- REVIEW SECTION (для завершённых гонок) -->
+          <div id="detail-review-section" style="display: none; margin-bottom: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--border);">
+            <div
+              style="
+                font-size: 11px;
+                text-transform: uppercase;
+                letter-spacing: 2px;
+                color: var(--text3);
+                margin-bottom: 0.75rem;
+                font-weight: 600;
+              "
+            >
+              Оценить организатора
+            </div>
+            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+              <button class="btn btn-green" onclick="app.submitReview(app.state.currentRace.id, 1)" id="btn-like">
+                👍 Лайк
+              </button>
+              <button class="btn btn-red" onclick="app.submitReview(app.state.currentRace.id, -1)" id="btn-dislike">
+                👎 Дизлайк
+              </button>
+              <button class="btn btn-ghost" onclick="app.deleteReview(app.state.currentRace.id)" id="btn-remove-review" style="display: none;">
+                Убрать оценку
+              </button>
+            </div>
+            <div id="review-error" class="form-error" style="margin-top: 0.5rem;"></div>
           </div>
 
           <div class="modal-action" id="detail-actions"></div>
@@ -1931,7 +1951,6 @@
                 <select class="form-input" name="status">
                   <option value="Регистрация">Регистрация</option>
                   <option value="Завершена">Завершена</option>
-                  <option value="Отменена">Отменена</option>
                 </select>
               </div>
             </div>
@@ -2011,7 +2030,6 @@
                 <select class="form-input" name="status">
                   <option value="Регистрация">Регистрация</option>
                   <option value="Завершена">Завершена</option>
-                  <option value="Отменена">Отменена</option>
                 </select>
               </div>
             </div>
@@ -2076,7 +2094,7 @@
       // CONFIGURATION
       // ==========================================
       const CONFIG = {
-        API_URL: "https://f1u.vercel.app",
+        API_URL: "http://127.0.0.1:8000",
         TOKEN_KEY: "f1_access_token",
         REFRESH_KEY: "f1_refresh_token",
       };
@@ -2233,6 +2251,25 @@
             body: { results },
           });
         }
+
+        // Reviews
+        async submitReview(raceId, vote) {
+          return this.request(`/races/${raceId}/review`, {
+            method: "POST",
+            body: { vote },
+          });
+        }
+
+        async deleteReview(raceId) {
+          return this.request(`/races/${raceId}/review`, {
+            method: "DELETE",
+          });
+        }
+
+        // Leaderboard
+        async getLeaderboard() {
+          return this.request("/auth/users/leaderboard");
+        }
       }
 
       // ==========================================
@@ -2284,12 +2321,6 @@
               this.renderRaces();
             });
           });
-          /*
-    document.querySelectorAll('.modal-overlay').forEach(overlay => {
-      overlay.addEventListener('click', (e) => {
-        if (e.target === overlay) this.closeModal(overlay.id);
-      });
-    });*/
         }
 
         navigate(page, subpage = null) {
@@ -2304,9 +2335,7 @@
             profile: "page-profile",
             news: "page-news",
             download: "page-download",
-            media: "page-media",
-            support: "page-support",
-            hub: "page-hub",
+            pilotstats: "page-pilotstats",
             info: "page-info",
           };
 
@@ -2332,62 +2361,8 @@
 
           if (page === "profile") {
             this.renderProfile();
-          }
-
-          // Handle subpages for support/hub
-          if (subpage) {
-            const placeholder = document.querySelector(
-              `#${pageId} .placeholder-page`
-            );
-            if (placeholder) {
-              const subpageNames = {
-                troubleshooting: "Устранение неполадок",
-                guide: "Руководство для игроков",
-                recruitment: "Набор в Администрацию",
-                tickets: "Support Tickets",
-                results: "Результаты матчей",
-                tours: "Туры",
-                live: "Лайв",
-                "team-stats": "Статистика команд",
-                h2h: "Head to Head",
-                "team-list": "Список команд",
-                "pilot-stats": "Статистика пилота",
-                transfers: "Трансферы",
-                current: "Текущие турниры",
-                past: "Прошедшие турниры",
-              };
-              const title = subpageNames[subpage] || subpage;
-              placeholder.innerHTML = `
-          <h1>${title}</h1>
-          <p>Если нашли баг или ошибку пишите в дискорд: r_znayu_chto_napisat</p>
-          <p style="margin-top: 2rem; color: var(--text3);"></p>
-        `;
-            }
-          } else {
-            // Restore default content for support/hub pages
-            if (page === "support") {
-              const placeholder = document.querySelector(
-                "#page-support .placeholder-page"
-              );
-              if (placeholder) {
-                placeholder.innerHTML = `
-            <h1>Поддержка</h1>
-            <p>Здесь вы можете найти ответы на частые вопросы, руководства и связаться с администрацией.</p>
-            <p style="margin-top: 2rem; color: var(--text3);">Выберите раздел в меню Support.</p>
-          `;
-              }
-            } else if (page === "hub") {
-              const placeholder = document.querySelector(
-                "#page-hub .placeholder-page"
-              );
-              if (placeholder) {
-                placeholder.innerHTML = `
-            <h1>Хаб</h1>
-            <p>Статистика матчей, команд, игроков и турниров.</p>
-            <p style="margin-top: 2rem; color: var(--text3);">Выберите интересующий раздел в выпадающем меню Хаб.</p>
-          `;
-              }
-            }
+          } else if (page === "pilotstats") {
+            this.loadLeaderboard();
           }
 
           if (page !== "home") {
@@ -2803,6 +2778,15 @@
               const canUnregister =
                 race.status === "Регистрация" && isRegistered;
 
+              // Добавляем рейтинг организатора
+              const ratingHtml = [];
+              if (race.organizer_likes > 0) {
+                ratingHtml.push(`<span style="color: var(--green);">👍 ${race.organizer_likes}</span>`);
+              }
+              if (race.organizer_dislikes > 0) {
+                ratingHtml.push(`<span style="color: var(--red);">👎 ${race.organizer_dislikes}</span>`);
+              }
+
               return `
         <div class="race-card" onclick="app.openRaceDetail(${race.id})">
           <div class="race-card-top">
@@ -2815,6 +2799,7 @@
           <div class="race-card-meta">
             <span>📅 ${this.formatDate(race.time)}</span>
             ${race.creator_email ? `<span>👤 ${race.creator_email}</span>` : ""}
+            ${ratingHtml.join('')}
           </div>
           <div class="race-card-footer">
             <div class="capacity-bar-wrap">
@@ -2918,7 +2903,8 @@
             document.getElementById("detail-about").textContent =
               race.about || "Описание не указано.";
 
-            document.getElementById("detail-meta").innerHTML = `
+            // Формируем мета-информацию с рейтингом
+            let metaHtml = `
         <div class="modal-meta-chip">📅 ${this.formatDate(race.time)}</div>
         <div class="modal-meta-chip">👥 ${race.users} / ${race.maxuser}</div>
         ${
@@ -2926,10 +2912,18 @@
             ? `<div class="modal-meta-chip">👤 Организатор: ${race.creator_email}</div>`
             : ""
         }
-        <span class="status-badge ${this.getStatusClass(race.status)}">${
-              race.status
-            }</span>
       `;
+            
+            // Добавляем рейтинг организатора
+            if (race.organizer_likes !== undefined || race.organizer_dislikes !== undefined) {
+              const likes = race.organizer_likes || 0;
+              const dislikes = race.organizer_dislikes || 0;
+              metaHtml += `<div class="modal-meta-chip" style="background: var(--surface3);">👍 ${likes} 👎 ${dislikes}</div>`;
+            }
+            
+            metaHtml += `<span class="status-badge ${this.getStatusClass(race.status)}">${race.status}</span>`;
+            
+            document.getElementById("detail-meta").innerHTML = metaHtml;
 
             const participants = await this.api.getRaceParticipants(id);
             document.getElementById(
@@ -2958,15 +2952,21 @@
                 const results = await this.api.getRaceResults(id);
                 if (results.results && results.results.length > 0) {
                   resultsWrap.style.display = "block";
+                  const POINTS_TABLE = {1:25,2:18,3:15,4:12,5:10,6:8,7:6,8:4,9:2,10:1};
                   document.getElementById("detail-results-body").innerHTML =
                     results.results
                       .map((r) => {
                         let posClass =
                           r.position <= 3 ? `pos-${r.position}` : "pos-other";
+                        const pts = POINTS_TABLE[r.position] || 0;
+                        const ptsHtml = pts > 0
+                          ? `<span style="font-family:var(--font-display);font-size:16px;color:var(--yellow);">+${pts}</span>`
+                          : `<span style="color:var(--text3);">—</span>`;
                         return `
                 <tr>
                   <td><span class="pos-badge ${posClass}">${r.position}</span></td>
                   <td>${r.username}</td>
+                  <td style="text-align:right;">${ptsHtml}</td>
                 </tr>
               `;
                       })
@@ -2979,6 +2979,21 @@
               }
             } else {
               resultsWrap.style.display = "none";
+            }
+
+            // Показываем секцию оценки для завершённых гонок, если пользователь участвовал
+            const reviewSection = document.getElementById("detail-review-section");
+            const isParticipant = participants.some(p => p.user_id === this.state.user?.id);
+            
+            if (race.status === "Завершена" && this.state.user && isParticipant) {
+              reviewSection.style.display = "block";
+              // Сбрасываем состояние кнопок
+              document.getElementById("btn-like").style.opacity = "1";
+              document.getElementById("btn-dislike").style.opacity = "1";
+              document.getElementById("btn-remove-review").style.display = "none";
+              document.getElementById("review-error").classList.remove("visible");
+            } else {
+              reviewSection.style.display = "none";
             }
 
             const actions = document.getElementById("detail-actions");
@@ -3023,6 +3038,123 @@
           }
         }
 
+        // Отправка оценки организатору
+        async submitReview(raceId, vote) {
+          try {
+            await this.api.submitReview(raceId, vote);
+            
+            this.showToast(vote === 1 ? '👍 Лайк поставлен!' : '👎 Дизлайк поставлен!');
+            
+            // Обновляем UI кнопок
+            document.getElementById("btn-like").style.opacity = vote === 1 ? '1' : '0.5';
+            document.getElementById("btn-dislike").style.opacity = vote === -1 ? '1' : '0.5';
+            document.getElementById("btn-remove-review").style.display = '';
+            
+            // Обновляем данные гонки
+            await this.loadRaces();
+            
+          } catch (error) {
+            const errorEl = document.getElementById("review-error");
+            errorEl.textContent = error.message;
+            errorEl.classList.add("visible");
+          }
+        }
+
+        // Удаление оценки
+        async deleteReview(raceId) {
+          try {
+            await this.api.deleteReview(raceId);
+            
+            this.showToast('Оценка удалена');
+            
+            // Сбрасываем UI кнопок
+            document.getElementById("btn-like").style.opacity = '1';
+            document.getElementById("btn-dislike").style.opacity = '1';
+            document.getElementById("btn-remove-review").style.display = 'none';
+            
+            await this.loadRaces();
+            
+          } catch (error) {
+            this.showToast(error.message, true);
+          }
+        }
+
+        // Загрузка таблицы лидеров
+        async loadLeaderboard() {
+          // Таблица очков
+          const POINTS = {1:25,2:18,3:15,4:12,5:10,6:8,7:6,8:4,9:2,10:1};
+          const COLORS = {1:'#ffc107',2:'#b0c4de',3:'#cd7f32'};
+          const pointsGrid = document.getElementById('points-table-grid');
+          if (pointsGrid && !pointsGrid.dataset.rendered) {
+            pointsGrid.dataset.rendered = '1';
+            pointsGrid.innerHTML = Object.entries(POINTS).map(([pos, pts]) => `
+              <div style="background: var(--surface); padding: 0.9rem 0.75rem; flex: 1; min-width: 56px; text-align: center;">
+                <div style="font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: var(--text3); margin-bottom: 4px;">${pos}</div>
+                <div style="font-family: var(--font-display); font-size: 22px; ${COLORS[pos] ? `color:${COLORS[pos]};` : 'color:var(--text2);'}">${pts}</div>
+              </div>
+            `).join('');
+          }
+
+          try {
+            const users = await this.api.getLeaderboard();
+            const tbody = document.getElementById('leaderboard-tbody');
+            
+            document.getElementById('leaderboard-count').textContent = 
+              `${users.length} ${this.pluralize(users.length, 'пилот', 'пилота', 'пилотов')}`;
+            
+            if (users.length === 0) {
+              tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 3rem;">Нет данных</td></tr>';
+              return;
+            }
+            
+            tbody.innerHTML = users.map((user, index) => {
+              const rank = index + 1;
+              let rankStyle = '';
+              let rowStyle = '';
+              if (rank === 1) { rankStyle = 'background: rgba(255,193,7,0.2); color: #ffc107; font-weight: 700;'; rowStyle = 'background: rgba(255,193,7,0.04);'; }
+              else if (rank === 2) { rankStyle = 'background: rgba(176,196,222,0.2); color: #b0c4de; font-weight: 700;'; rowStyle = 'background: rgba(176,196,222,0.03);'; }
+              else if (rank === 3) { rankStyle = 'background: rgba(205,127,50,0.2); color: #cd7f32; font-weight: 700;'; rowStyle = 'background: rgba(205,127,50,0.03);'; }
+
+              const bestPos = user.best_position;
+              let bestPosHtml = '<span style="color:var(--text3);">—</span>';
+              if (bestPos) {
+                const cls = bestPos <= 3 ? `pos-${bestPos}` : 'pos-other';
+                bestPosHtml = `<span class="pos-badge ${cls}">${bestPos}</span>`;
+              }
+
+              return `
+                <tr style="${rowStyle}">
+                  <td>
+                    <span style="display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 50%; ${rankStyle}">
+                      ${rank}
+                    </span>
+                  </td>
+                  <td>
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                      <div class="participant-avatar" style="width: 32px; height: 32px; font-size: 12px;">
+                        ${user.email.slice(0, 2).toUpperCase()}
+                      </div>
+                      <div>
+                        <div style="font-weight: 500;">${user.email.split('@')[0]}</div>
+                        <div style="font-size: 11px; color: var(--text3);">${user.email}</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td style="color: var(--text2);">${user.races_completed || 0}</td>
+                  <td>${bestPosHtml}</td>
+                  <td>
+                    <div class="hero-stat-val" style="font-size: 22px;">${user.score || 0}</div>
+                  </td>
+                </tr>
+              `;
+            }).join('');
+            
+          } catch (error) {
+            document.getElementById('leaderboard-tbody').innerHTML = 
+              `<tr><td colspan="5" style="text-align: center; color: var(--red); padding: 3rem;">${error.message}</td></tr>`;
+          }
+        }
+
         renderProfile() {
           if (!this.state.user) {
             this.navigate("home");
@@ -3050,6 +3182,16 @@
             statusEl.style.color = "var(--green)";
           } else {
             statusEl.textContent = "Пилот";
+          }
+
+          // Показываем рейтинг организатора
+          const ratingRow = document.getElementById("profile-rating-row");
+          if (user.organizer_likes !== undefined || user.organizer_dislikes !== undefined) {
+            ratingRow.style.display = "flex";
+            document.getElementById("profile-likes").textContent = user.organizer_likes || 0;
+            document.getElementById("profile-dislikes").textContent = user.organizer_dislikes || 0;
+          } else {
+            ratingRow.style.display = "none";
           }
 
           const userRaces = this.state.races.filter((r) =>

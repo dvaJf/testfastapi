@@ -1,10 +1,15 @@
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, update
+from sqlalchemy import select, update, func, case 
 from sqlalchemy.orm import selectinload
-from datetime import datetime
-from src.races.models import Race, RaceResult
+from datetime import datetime, timedelta
+from src.races.models import Race, RaceResult, OrganizerReview
+from src.auth.models import User
 from typing import Optional
 from src.exceptions import *
+
+pos = {1: 25, 2: 18, 3: 15, 4: 12, 5: 10, 6: 8, 7: 6,  8: 4,  9: 2,  10: 1,}
+def points_for_position(position: int) -> int:
+    return pos.get(position, 0)
 
 async def get_all_races_with_creator(session: AsyncSession):
     result = await session.execute(
@@ -36,7 +41,8 @@ async def create_race(name: str, race: str, about: Optional[str], time: datetime
         time=time.replace(tzinfo=None),
         maxuser=maxuser,
         status=status,
-        created_by=created_by
+        created_by=created_by,
+        scores_awarded=False
     )
     session.add(new_race)
     await session.commit()
@@ -89,7 +95,6 @@ async def register_user(id: int, user_id: int, session: AsyncSession):
 
 async def unregister_user(id: int, user_id: int, session: AsyncSession):
     race = await get_race(id, session)
-    
     if race.status != "Регистрация":
         raise BadRequestException()
 
@@ -109,28 +114,52 @@ async def unregister_user(id: int, user_id: int, session: AsyncSession):
 
 async def set_results(race_id: int, results: list, session: AsyncSession):
     race = await get_race(race_id, session)
-    
     if race.status != "Завершена":
         raise BadRequestException()
 
     positions = [r.position for r in results]
     if len(positions) != len(set(positions)):
-        raise BadRequestException()
+        raise BadRequestException(detail="Позиции участников должны быть уникальными")
 
+
+    existing_q = await session.execute(
+        select(RaceResult).where(RaceResult.race_id == race_id)
+    )
+    existing_map: dict[int, RaceResult] = {
+        rr.user_id: rr for rr in existing_q.scalars().all()
+    }
+
+    if race.scores_awarded:
+        for user_id, rr in existing_map.items():
+            if rr.position is not None:
+                old_pts = points_for_position(rr.position)
+                if old_pts > 0:
+                    await session.execute(
+                        update(User)
+                        .where(User.id == user_id)
+                        .values(score=User.score - old_pts)
+                    )
+
+    # Обновляем позиции
     for item in results:
-        result = await session.execute(
-            select(RaceResult)
-            .where(RaceResult.race_id == race_id)
-            .where(RaceResult.user_id == item.user_id)
-        )
-        race_result = result.scalar_one_or_none()
-
+        race_result = existing_map.get(item.user_id)
         if race_result is None:
-            raise BadRequestException()
-
+            raise BadRequestException(detail=f"Пользователь {item.user_id} не зарегистрирован в этой гонке")
         race_result.position = item.position
 
+    # Начисляем новые очки всем участникам
+    for item in results:
+        pts = points_for_position(item.position)
+        if pts > 0:
+            await session.execute(
+                update(User)
+                .where(User.id == item.user_id)
+                .values(score=User.score + pts)
+            )
+
+    race.scores_awarded = True
     await session.commit()
+
 
 async def update_race(race_id: int, data: dict, session: AsyncSession):
     race = await get_race(race_id, session)
@@ -138,9 +167,107 @@ async def update_race(race_id: int, data: dict, session: AsyncSession):
     for field, value in data.items():
         if value is not None:
             if isinstance(value, datetime):
-                value = value.replace(tzinfo=None)
+                value = value.replace(tzinfo=None) + timedelta(hours=3)
             setattr(race, field, value)
 
     await session.commit()
     await session.refresh(race)
     return race
+
+async def get_organizer_rating(
+    organizer_id: int,
+    session: AsyncSession
+) -> dict[str, int]:
+    stmt = (
+        select(
+            func.sum(case((OrganizerReview.vote == 1, 1), else_=0)).label("likes"),
+            func.sum(case((OrganizerReview.vote == -1, 1), else_=0)).label("dislikes"),
+        )
+        .where(OrganizerReview.organizer_id == organizer_id)
+    )
+    result = await session.execute(stmt)
+    row = result.one_or_none()
+    if row:
+        return {"likes": row.likes or 0, "dislikes": row.dislikes or 0}
+    return {"likes": 0, "dislikes": 0}
+
+
+async def get_organizer_ratings_bulk(
+    organizer_ids: list[int],
+    session: AsyncSession
+) -> dict[int, dict[str, int]]:
+    if not organizer_ids:
+        return {}
+    stmt = (
+        select(
+            OrganizerReview.organizer_id,
+            func.sum(case((OrganizerReview.vote == 1, 1), else_=0)).label("likes"),
+            func.sum(case((OrganizerReview.vote == -1, 1), else_=0)).label("dislikes"),
+        )
+        .where(OrganizerReview.organizer_id.in_(organizer_ids))
+        .group_by(OrganizerReview.organizer_id)
+    )
+    result = await session.execute(stmt)
+    ratings = {}
+    for row in result:
+        ratings[row.organizer_id] = {
+            "likes": row.likes or 0,
+            "dislikes": row.dislikes or 0
+        }
+    for oid in organizer_ids:
+        if oid not in ratings:
+            ratings[oid] = {"likes": 0, "dislikes": 0}
+    return ratings
+
+
+async def submit_review(race_id: int, voter_id: int, vote: int, session: AsyncSession):
+    race = await get_race(race_id, session)
+
+    if race.status != "Завершена":
+        raise BadRequestException()
+
+    if race.created_by == voter_id:
+        raise BadRequestException()
+
+    participant = await session.execute(
+        select(RaceResult)
+        .where(RaceResult.race_id == race_id)
+        .where(RaceResult.user_id == voter_id)
+    )
+    if participant.scalar_one_or_none() is None:
+        raise ForbiddenException()
+
+    existing = await session.execute(
+        select(OrganizerReview)
+        .where(OrganizerReview.race_id == race_id)
+        .where(OrganizerReview.voter_id == voter_id)
+    )
+    review = existing.scalar_one_or_none()
+
+    if review:
+        review.vote = vote
+    else:
+        review = OrganizerReview(
+            race_id=race_id,
+            voter_id=voter_id,
+            organizer_id=race.created_by,
+            vote=vote,
+        )
+        session.add(review)
+
+    await session.commit()
+    await session.refresh(review)
+    return review
+
+
+async def delete_review(race_id: int, voter_id: int, session: AsyncSession):
+    existing = await session.execute(
+        select(OrganizerReview)
+        .where(OrganizerReview.race_id == race_id)
+        .where(OrganizerReview.voter_id == voter_id)
+    )
+    review = existing.scalar_one_or_none()
+    if review is None:
+        raise NotFoundException()
+    await session.delete(review)
+    await session.commit()
