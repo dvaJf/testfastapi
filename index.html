@@ -67,15 +67,20 @@
   }
   @keyframes spin { to { transform: rotate(360deg); } }
 
-  /* NAV */
-  nav {
+  /* ===== HEADER TWO-TIER ===== */
+  .site-header {
     position: sticky; top: 0; z-index: 100;
-    background: rgba(11,11,11,0.92);
-    backdrop-filter: blur(12px);
+    background: rgba(11,11,11,0.96);
+    backdrop-filter: blur(14px);
     border-bottom: 1px solid var(--border);
-    padding: 0 2rem;
+  }
+
+  /* TOP BAR */
+  .header-top {
     display: flex; align-items: center; justify-content: space-between;
-    height: 60px;
+    padding: 0 2rem;
+    height: 58px;
+    border-bottom: 1px solid var(--border);
   }
 
   .nav-logo {
@@ -86,6 +91,7 @@
     color: var(--text);
     text-decoration: none;
     cursor: pointer;
+    flex-shrink: 0;
   }
 
   .nav-logo-badge {
@@ -100,7 +106,59 @@
     text-transform: uppercase;
   }
 
-  .nav-links { display: flex; align-items: center; gap: 6px; }
+  .header-top-center {
+    display: flex; align-items: center; gap: 1.5rem;
+    flex: 1; justify-content: center;
+  }
+
+  .header-discord-link {
+    display: flex; align-items: center; gap: 7px;
+    background: #5865F2;
+    color: #fff;
+    font-size: 12px; font-weight: 600;
+    padding: 6px 14px;
+    border-radius: 6px;
+    text-decoration: none;
+    transition: background 0.15s;
+    letter-spacing: 0.3px;
+  }
+  .header-discord-link:hover { background: #4752c4; }
+  .header-discord-link svg { width: 16px; height: 16px; fill: currentColor; flex-shrink: 0; }
+
+  .header-streams {
+    display: flex; align-items: center; gap: 8px;
+  }
+
+  .stream-pill {
+    display: flex; align-items: center; gap: 6px;
+    background: var(--surface2);
+    border: 1px solid var(--border2);
+    color: var(--text2);
+    font-size: 11px; font-weight: 600;
+    padding: 5px 11px;
+    border-radius: 6px;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.15s;
+    letter-spacing: 0.3px;
+    text-transform: uppercase;
+  }
+  .stream-pill:hover { color: #9146FF; border-color: #9146FF; background: rgba(145,70,255,0.08); }
+  .stream-pill .live-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--red);
+    animation: pulse-dot 1.4s ease-in-out infinite;
+  }
+  @keyframes pulse-dot {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(0.8); }
+  }
+
+  .header-top-right {
+    display: flex; align-items: center; gap: 6px;
+    flex-shrink: 0;
+  }
 
   .nav-btn {
     background: none;
@@ -120,9 +178,89 @@
   .nav-btn.primary:hover { background: #c00; }
   .nav-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
-  .user-menu {
-    display: flex; align-items: center; gap: 10px;
+  /* BOTTOM NAV BAR */
+  .header-nav {
+    display: flex; align-items: center;
+    padding: 0 2rem;
+    height: 44px;
+    gap: 2px;
   }
+
+  .hnav-item {
+    position: relative;
+  }
+
+  .hnav-link {
+    display: flex; align-items: center; gap: 4px;
+    padding: 0 14px;
+    height: 44px;
+    font-size: 13px; font-weight: 500;
+    color: var(--text2);
+    cursor: pointer;
+    background: none;
+    border: none;
+    font-family: var(--font-body);
+    letter-spacing: 0.2px;
+    transition: color 0.15s;
+    white-space: nowrap;
+    text-decoration: none;
+  }
+  .hnav-link:hover, .hnav-item:hover .hnav-link { color: var(--text); }
+  .hnav-link.active { color: var(--text); }
+  .hnav-link.active::after {
+    content: '';
+    position: absolute; left: 8px; right: 8px; bottom: 0;
+    height: 2px;
+    background: var(--red);
+    border-radius: 2px 2px 0 0;
+  }
+
+  .hnav-arrow {
+    font-size: 9px; opacity: 0.6;
+    transition: transform 0.18s;
+  }
+  .hnav-item:hover .hnav-arrow { transform: rotate(180deg); }
+
+  /* DROPDOWN */
+  .hnav-dropdown {
+    position: absolute; top: 100%; left: 0;
+    min-width: 200px;
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    border-radius: 8px;
+    padding: 6px 0;
+    box-shadow: 0 12px 40px rgba(0,0,0,0.6);
+    opacity: 0; pointer-events: none;
+    transform: translateY(8px);
+    transition: opacity 0.18s, transform 0.18s;
+    z-index: 200;
+  }
+  .hnav-item:hover .hnav-dropdown {
+    opacity: 1; pointer-events: all;
+    transform: translateY(0);
+  }
+
+  .hnav-drop-item {
+    display: block;
+    padding: 9px 16px;
+    font-size: 13px; font-weight: 400;
+    color: var(--text2);
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.12s;
+    white-space: nowrap;
+    background: none; border: none;
+    width: 100%; text-align: left;
+    font-family: var(--font-body);
+  }
+  .hnav-drop-item:hover { color: var(--text); background: var(--surface2); padding-left: 20px; }
+  .hnav-drop-divider {
+    height: 1px; background: var(--border);
+    margin: 4px 0;
+  }
+
+  /* User pill in top-right when logged in */
+  .user-menu { display: flex; align-items: center; gap: 10px; }
   .user-avatar {
     width: 32px; height: 32px;
     border-radius: 50%;
@@ -132,6 +270,9 @@
     display: flex; align-items: center; justify-content: center;
     text-transform: uppercase;
   }
+
+  /* keep nav-links id for JS compat */
+  .nav-links { display: contents; }
 
   /* HERO */
   .hero {
@@ -720,6 +861,32 @@
     font-size: 14px;
   }
 
+  /* NEW PAGES (placeholder) */
+  .page {
+    display: none;
+  }
+  .page.active {
+    display: block;
+  }
+  .placeholder-page {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 4rem 2rem;
+    position: relative;
+    z-index: 1;
+  }
+  .placeholder-page h1 {
+    font-family: var(--font-display);
+    font-size: 64px;
+    margin-bottom: 2rem;
+    color: var(--text);
+  }
+  .placeholder-page p {
+    color: var(--text2);
+    font-size: 18px;
+    max-width: 700px;
+  }
+
   /* Responsive */
   @media (max-width: 768px) {
     nav { padding: 0 1rem; }
@@ -732,6 +899,11 @@
     .hero-stats { flex-direction: column; gap: 1rem; }
     .admin-table { font-size: 12px; }
     .admin-table th, .admin-table td { padding: 8px; }
+    .header-top-center { display: none; }
+    .header-nav { overflow-x: auto; gap: 0; }
+    .hnav-link { padding: 0 10px; font-size: 12px; }
+    .header-top { padding: 0 1rem; }
+    .header-nav { padding: 0 1rem; }
   }
 </style>
 </head>
@@ -742,25 +914,122 @@
   <div class="spinner"></div>
 </div>
 
-<!-- NAV -->
-<nav>
-  <a class="nav-logo" onclick="app.navigate('home')">
-    F1<span class="nav-logo-badge">online</span>
-  </a>
-  <div class="nav-links" id="nav-links">
-    <button class="nav-btn" id="btn-admin" style="display:none;" onclick="app.toggleAdmin()">Панель</button>
-    <button class="nav-btn" id="btn-create" style="display:none;" onclick="app.openCreateModal()">+ Создать гонку</button>
-    <button class="nav-btn" id="btn-profile" style="display:none;" onclick="app.navigate('profile')">Профиль</button>
-    <button class="nav-btn" id="btn-login" onclick="app.openAuthModal('login')">Войти</button>
-    <button class="nav-btn primary" id="btn-register-nav" onclick="app.openAuthModal('signup')">Регистрация</button>
+<!-- HEADER -->
+<header class="site-header">
+
+  <!-- TOP BAR -->
+  <div class="header-top">
+    <!-- Logo -->
+    <a class="nav-logo" onclick="app.navigate('home')" title="Главная страница">
+      F1<span class="nav-logo-badge">online</span>
+    </a>
+
+    <!-- Center: Discord + Streams -->
+    <div class="header-top-center">
+      <a href="https://discord.gg/NKgncud8" class="header-discord-link" target="_blank" rel="noopener" title="Наш Discord сервер">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057.1 18.08.113 18.1.131 18.11a19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03z"/>
+        </svg>
+        Ссылка на Discord
+      </a>
+
+      <div class="header-streams">
+        <a href="https://www.twitch.tv/?lang=ru" class="stream-pill" target="_blank" rel="noopener" title="Twitch стрим">
+          <span class="live-dot"></span>
+          Twitch
+        </a>
+      </div>
+    </div>
+
+    <!-- Right: Auth buttons -->
+    <div class="header-top-right">
+      <div class="nav-links" id="nav-links">
+        <button class="nav-btn" id="btn-admin" style="display:none;" onclick="app.toggleAdmin()">Панель</button>
+        <button class="nav-btn" id="btn-create" style="display:none;" onclick="app.openCreateModal()">+ Создать</button>
+        <button class="nav-btn" id="btn-profile" style="display:none;" onclick="app.navigate('profile')">Профиль</button>
+        <button class="nav-btn" id="btn-login" onclick="app.openAuthModal('login')">Войти</button>
+        <button class="nav-btn primary" id="btn-register-nav" onclick="app.openAuthModal('signup')">Зарегистрироваться</button>
+      </div>
+    </div>
   </div>
-</nav>
+
+  <!-- BOTTOM NAV BAR -->
+  <nav class="header-nav">
+    <div class="hnav-item">
+      <button class="hnav-link" data-page="home" onclick="app.navigate('home')" title="Главная страница с гонками">Home</button>
+    </div>
+    <div class="hnav-item">
+      <button class="hnav-link" data-page="news" onclick="app.navigate('news')" title="Последние новости Formula 1">Новости</button>
+    </div>
+    <div class="hnav-item">
+      <button class="hnav-link" data-page="download" onclick="app.navigate('download')" title="Скачать моды, скины и патчи">Скачать</button>
+    </div>
+    <div class="hnav-item">
+      <button class="hnav-link" data-page="media" onclick="app.navigate('media')" title="Фото и видео с гонок">Медиа</button>
+    </div>
+
+    <!-- Support dropdown -->
+    <div class="hnav-item">
+      <button class="hnav-link" title="Техническая поддержка и гайды">
+        Support <span class="hnav-arrow">▼</span>
+      </button>
+      <div class="hnav-dropdown">
+        <a href="#" class="hnav-drop-item" onclick="app.navigate('support', 'troubleshooting')">Устранение неполадок</a>
+        <a href="#" class="hnav-drop-item" onclick="app.navigate('support', 'guide')">Руководство для игроков</a>
+        <div class="hnav-drop-divider"></div>
+        <a href="#" class="hnav-drop-item" onclick="app.navigate('support', 'recruitment')">Набор в Администрацию</a>
+        <a href="#" class="hnav-drop-item" onclick="app.navigate('support', 'tickets')">Support Tickets</a>
+      </div>
+    </div>
+
+    <!-- Хаб dropdown -->
+    <div class="hnav-item">
+      <button class="hnav-link" title="Игровой хаб: статистика, команды, турниры">
+        Хаб <span class="hnav-arrow">▼</span>
+      </button>
+      <div class="hnav-dropdown" style="min-width:580px; padding: 16px 0 10px;">
+        <div style="display:flex; gap:0; padding:0 16px 10px;">
+          <div style="flex:1; padding-right:16px; border-right:1px solid var(--border);">
+            <div style="font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--text3);font-weight:600;margin-bottom:10px;">Матчи</div>
+            <a href="#" class="hnav-drop-item" style="padding-left:0;" onclick="app.navigate('hub', 'results')">Результаты</a>
+            <a href="#" class="hnav-drop-item" style="padding-left:0;" onclick="app.navigate('hub', 'tours')">Туры</a>
+            <a href="#" class="hnav-drop-item" style="padding-left:0;" onclick="app.navigate('hub', 'live')">Лайв</a>
+          </div>
+          <div style="flex:1.2; padding:0 16px; border-right:1px solid var(--border);">
+            <div style="font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--text3);font-weight:600;margin-bottom:10px;">Команды</div>
+            <a href="#" class="hnav-drop-item" style="padding-left:0;" onclick="app.navigate('hub', 'team-stats')">Статистика команд</a>
+            <a href="#" class="hnav-drop-item" style="padding-left:0;" onclick="app.navigate('hub', 'h2h')">Head to Head</a>
+            <a href="#" class="hnav-drop-item" style="padding-left:0;" onclick="app.navigate('hub', 'team-list')">Список команд</a>
+          </div>
+          <div style="flex:1.1; padding:0 16px; border-right:1px solid var(--border);">
+            <div style="font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--text3);font-weight:600;margin-bottom:10px;">Игроки</div>
+            <a href="#" class="hnav-drop-item" style="padding-left:0;" onclick="app.navigate('hub', 'pilot-stats')">Статистика пилота</a>
+            <a href="#" class="hnav-drop-item" style="padding-left:0;" onclick="app.navigate('hub', 'transfers')">Трансферы</a>
+          </div>
+          <div style="flex:1; padding:0 16px; border-right:1px solid var(--border);">
+            <div style="font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--text3);font-weight:600;margin-bottom:10px;">Турниры</div>
+            <a href="#" class="hnav-drop-item" style="padding-left:0;" onclick="app.navigate('hub', 'current')">Текущие</a>
+            <a href="#" class="hnav-drop-item" style="padding-left:0;" onclick="app.navigate('hub', 'past')">Прошедшие</a>
+          </div>
+          <div style="flex:0.8; padding-left:16px;">
+            <div style="font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--text3);font-weight:600;margin-bottom:10px;">Аккаунт</div>
+            <a href="#" class="hnav-drop-item" style="padding-left:0;" onclick="app.navigate('profile')">Мой профиль</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="hnav-item">
+      <button class="hnav-link" data-page="info" onclick="app.navigate('info')" title="О проекте и правилах">Информация</button>
+    </div>
+  </nav>
+</header>
 
 <!-- MAIN CONTENT -->
 <main id="main-content">
 
   <!-- HOME PAGE -->
-  <div id="page-home">
+  <div id="page-home" class="page active">
     <section class="hero">
       <h1>Гонки<br/><span>Скорость</span><br/>Победа</h1>
       <p class="hero-sub">Регистрируйтесь на гонки, следите за результатами и участвуйте в соревнованиях.</p>
@@ -847,7 +1116,7 @@
   </div>
 
   <!-- PROFILE PAGE -->
-  <div id="page-profile" style="display:none;">
+  <div id="page-profile" class="page">
     <section class="profile-section">
       <div class="profile-card">
         <div class="profile-header">
@@ -876,6 +1145,60 @@
         <div class="empty-state">Нет активных регистраций</div>
       </div>
     </section>
+  </div>
+
+  <!-- НОВОСТИ -->
+  <div id="page-news" class="page">
+    <div class="placeholder-page">
+      <h1>Новости</h1>
+      <p>Новости, анонсы гонок и обновления.</p>
+      <p style="margin-top: 2rem; color: var(--text3);"></p>
+    </div>
+  </div>
+
+  <!-- СКАЧАТЬ -->
+  <div id="page-download" class="page">
+    <div class="placeholder-page">
+      <h1>Скачать</h1>
+      <p>Скачать отсюда: моды, скины, патчи, конфигурации и другие файлы.</p>
+      <p style="margin-top: 2rem; color: var(--text3);"></p>
+    </div>
+  </div>
+
+  <!-- МЕДИА -->
+  <div id="page-media" class="page">
+    <div class="placeholder-page">
+      <h1>Медиа</h1>
+      <p>Фотографии с гонок, видеообзоры, скриншоты и стримы.</p>
+      <p style="margin-top: 2rem; color: var(--text3);"></p>
+    </div>
+  </div>
+
+  <!-- SUPPORT -->
+  <div id="page-support" class="page">
+    <div class="placeholder-page">
+      <h1>Поддержка</h1>
+      <p>Здесь вы можете найти ответы на частые вопросы, руководства и связаться с администрацией.</p>
+      <p style="margin-top: 2rem; color: var(--text3);">Выберите раздел в меню Support.</p>
+    </div>
+  </div>
+
+  <!-- ХАБ -->
+  <div id="page-hub" class="page">
+    <div class="placeholder-page">
+      <h1>Хаб</h1>
+      <p>Статистика матчей, команд, игроков и турниров.</p>
+      <p style="margin-top: 2rem; color: var(--text3);">Выберите интересующий раздел в выпадающем меню Хаб.</p>
+    </div>
+  </div>
+
+  <!-- ИНФОРМАЦИЯ -->
+  <div id="page-info" class="page">
+    <div class="placeholder-page">
+      <h1>Информация</h1>
+      <p>О проекте, правилах</p>
+      <p style="margin-top: 2rem; color: var(--text3);"></p>
+    </div>
   </div>
 
 </main>
@@ -1100,7 +1423,7 @@
 // CONFIGURATION
 // ==========================================
 const CONFIG = {
-  API_URL: 'https://f1u.vercel.app/',
+  API_URL: 'http://127.0.0.1:8000',
   TOKEN_KEY: 'f1_access_token',
   REFRESH_KEY: 'f1_refresh_token'
 };
@@ -1300,20 +1623,100 @@ class App {
         this.renderRaces();
       });
     });
-
+/*
     document.querySelectorAll('.modal-overlay').forEach(overlay => {
       overlay.addEventListener('click', (e) => {
         if (e.target === overlay) this.closeModal(overlay.id);
       });
-    });
+    });*/
   }
 
-  navigate(page) {
-    document.getElementById('page-home').style.display = page === 'home' ? 'block' : 'none';
-    document.getElementById('page-profile').style.display = page === 'profile' ? 'block' : 'none';
+  navigate(page, subpage = null) {
+    // Hide all pages
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    
+    // Show selected page
+    const pageMap = {
+      'home': 'page-home',
+      'profile': 'page-profile',
+      'news': 'page-news',
+      'download': 'page-download',
+      'media': 'page-media',
+      'support': 'page-support',
+      'hub': 'page-hub',
+      'info': 'page-info'
+    };
+    
+    const pageId = pageMap[page];
+    if (pageId) {
+      document.getElementById(pageId).classList.add('active');
+    }
+    
+    // Update active nav link
+    document.querySelectorAll('.hnav-link').forEach(link => link.classList.remove('active'));
+    const activeLink = document.querySelector(`.hnav-link[data-page="${page}"]`);
+    if (activeLink) {
+      activeLink.classList.add('active');
+    } else if (page === 'home') {
+      document.querySelector('.hnav-link[onclick*="home"]')?.classList.add('active');
+    }
     
     if (page === 'profile') {
       this.renderProfile();
+    }
+    
+    // Handle subpages for support/hub
+    if (subpage) {
+      const placeholder = document.querySelector(`#${pageId} .placeholder-page`);
+      if (placeholder) {
+        const subpageNames = {
+          'troubleshooting': 'Устранение неполадок',
+          'guide': 'Руководство для игроков',
+          'recruitment': 'Набор в Администрацию',
+          'tickets': 'Support Tickets',
+          'results': 'Результаты матчей',
+          'tours': 'Туры',
+          'live': 'Лайв',
+          'team-stats': 'Статистика команд',
+          'h2h': 'Head to Head',
+          'team-list': 'Список команд',
+          'pilot-stats': 'Статистика пилота',
+          'transfers': 'Трансферы',
+          'current': 'Текущие турниры',
+          'past': 'Прошедшие турниры'
+        };
+        const title = subpageNames[subpage] || subpage;
+        placeholder.innerHTML = `
+          <h1>${title}</h1>
+          <p>Содержимое раздела "${title}"</p>
+          <p style="margin-top: 2rem; color: var(--text3);"></p>
+        `;
+      }
+    } else {
+      // Restore default content for support/hub pages
+      if (page === 'support') {
+        const placeholder = document.querySelector('#page-support .placeholder-page');
+        if (placeholder) {
+          placeholder.innerHTML = `
+            <h1>Поддержка</h1>
+            <p>Здесь вы можете найти ответы на частые вопросы, руководства и связаться с администрацией.</p>
+            <p style="margin-top: 2rem; color: var(--text3);">Выберите раздел в меню Support.</p>
+          `;
+        }
+      } else if (page === 'hub') {
+        const placeholder = document.querySelector('#page-hub .placeholder-page');
+        if (placeholder) {
+          placeholder.innerHTML = `
+            <h1>Хаб</h1>
+            <p>Статистика матчей, команд, игроков и турниров.</p>
+            <p style="margin-top: 2rem; color: var(--text3);">Выберите интересующий раздел в выпадающем меню Хаб.</p>
+          `;
+        }
+      }
+    }
+    
+    if (page !== 'home') {
+      document.getElementById('admin-panel')?.classList.remove('visible');
     }
   }
 
@@ -1476,7 +1879,6 @@ class App {
     }
   }
 
-  // Проверяем, может ли пользователь редактировать гонки
   canEditRaces() {
     return this.state.user && (this.state.user.is_verified || this.state.user.is_superuser);
   }
@@ -1498,7 +1900,6 @@ class App {
   async openEditModal(raceId, e) {
     if (e) e.stopPropagation();
     
-    // Проверяем права на редактирование
     if (!this.canEditRaces()) {
       this.showToast('У вас нет прав на редактирование гонок', true);
       return;
@@ -1548,7 +1949,6 @@ class App {
       await this.loadRaces();
       this.state.editingRace = null;
     } catch (error) {
-      // Обработка ошибки прав доступа
       if (error.message.includes('Forbidden') || error.message.includes('403')) {
         document.getElementById('error-edit-race').textContent = 'У вас нет прав на редактирование этой гонки';
       } else {
@@ -1565,8 +1965,6 @@ class App {
 
     try {
       const race = await this.api.getRace(raceId);
-
-      // Permission check is handled by backend on save
       this.state.currentRace = race;
       const participants = await this.api.getRaceParticipants(raceId);
 
@@ -1677,9 +2075,6 @@ class App {
       return;
     }
 
-    // Проверяем, может ли текущий пользователь редактировать гонки
-    const canEditAnyRace = this.canEditRaces();
-
     grid.innerHTML = filtered.map(race => {
       const pct = Math.round((race.users / race.maxuser) * 100);
       const fillClass = pct >= 100 ? 'full' : pct >= 75 ? 'warn' : '';
@@ -1733,7 +2128,6 @@ class App {
     }).join('');
   }
 
-  // ADMIN TABLE
   renderAdminTable() {
     if (!this.state.user?.is_superuser) return;
     
@@ -1981,4 +2375,4 @@ class App {
 const app = new App();
 </script>
 </body>
-</html>,
+</html>
