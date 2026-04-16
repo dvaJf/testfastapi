@@ -1796,12 +1796,12 @@
           <!-- LOGIN -->
           <form id="form-login" onsubmit="app.handleLogin(event)">
             <div class="form-group">
-              <label class="form-label">Email</label>
+              <label class="form-label">Имя</label>
               <input
                 class="form-input"
-                type="email"
+                
                 name="email"
-                placeholder="pilot@f1races.ru"
+                placeholder="Ваше имя"
                 required
               />
               <div class="form-error" id="error-login-email"></div>
@@ -1839,12 +1839,12 @@
             onsubmit="app.handleRegister(event)"
           >
             <div class="form-group">
-              <label class="form-label">Email</label>
+              <label class="form-label">Имя</label>
               <input
                 class="form-input"
-                type="email"
+                
                 name="email"
-                placeholder="pilot@f1races.ru"
+                placeholder="Ваше имя"
                 required
               />
               <div class="form-error" id="error-signup-email"></div>
@@ -2094,7 +2094,7 @@
       // CONFIGURATION
       // ==========================================
       const CONFIG = {
-        API_URL: "https://f1u.vercel.app/",
+        API_URL: "http://localhost:8000",
         TOKEN_KEY: "f1_access_token",
         REFRESH_KEY: "f1_refresh_token",
       };
