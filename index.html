@@ -18,7 +18,57 @@
         margin: 0;
         padding: 0;
       }
+      ::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
 
+::-webkit-scrollbar-track {
+  background: var(--surface);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--surface3);
+  border-radius: 4px;
+  transition: background 0.2s;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--red);
+}
+
+/* Для Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--surface3) var(--surface);
+}
+
+/* Тонкий скролл для модальных окон */
+.modal::-webkit-scrollbar,
+.modal-body::-webkit-scrollbar {
+  width: 6px;
+}
+
+.modal::-webkit-scrollbar-thumb,
+.modal-body::-webkit-scrollbar-thumb {
+  background: var(--border2);
+  border-radius: 3px;
+}
+
+.modal::-webkit-scrollbar-thumb:hover,
+.modal-body::-webkit-scrollbar-thumb:hover {
+  background: var(--red);
+}
+
+/* Скрыть скролл но оставить функциональность (опционально) */
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
       :root {
         --red: #e10600;
         --red-dark: #9b0000;
@@ -727,6 +777,9 @@
       .modal-overlay.open .modal {
         transform: translateY(0);
       }
+      .modal.wide {
+        width: min(800px, 94vw);
+      }
 
       .modal-header {
         padding: 1.5rem 1.75rem 0;
@@ -951,6 +1004,10 @@
         opacity: 0.6;
         cursor: not-allowed;
       }
+      textarea.form-input {
+        min-height: 100px;
+        resize: vertical;
+      }
 
       .form-error {
         color: var(--red);
@@ -1144,6 +1201,10 @@
         background: var(--green);
         border-color: var(--green);
       }
+      .admin-btn.danger:hover {
+        background: var(--red);
+        border-color: var(--red);
+      }
 
       /* Empty state */
       .empty-state {
@@ -1254,6 +1315,210 @@
         max-width: 700px;
       }
 
+      /* ===== NEWS PAGE STYLES ===== */
+      .news-section {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem;
+        position: relative;
+        z-index: 1;
+      }
+
+      .news-hero {
+        padding: 3rem 2rem 2rem;
+        max-width: 1200px;
+        margin: 0 auto;
+      }
+      .news-hero h1 {
+        font-family: var(--font-display);
+        font-size: clamp(42px, 6vw, 72px);
+        line-height: 1;
+        letter-spacing: 2px;
+        margin-bottom: 1rem;
+        color: var(--text);
+      }
+      .news-hero h1 span {
+        color: var(--red);
+      }
+
+      /* News Admin Panel */
+      .news-admin-panel {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 2rem 3rem;
+        position: relative;
+        z-index: 1;
+        display: none;
+      }
+      .news-admin-panel.visible {
+        display: block;
+      }
+
+      /* News Grid */
+      .news-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+        gap: 1.5rem;
+      }
+
+      .news-card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        overflow: hidden;
+        cursor: pointer;
+        transition: all 0.2s;
+        position: relative;
+      }
+      .news-card:hover {
+        border-color: var(--border2);
+        transform: translateY(-4px);
+        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+      }
+      .news-card::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 0;
+        right: 0;
+        height: 3px;
+        background: transparent;
+        transition: background 0.2s;
+      }
+      .news-card:hover::before {
+        background: var(--red);
+      }
+
+      .news-card-image {
+        width: 100%;
+        height: 180px;
+        background: var(--surface2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+      }
+      .news-card-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+      .news-card-image-placeholder {
+        font-size: 48px;
+        opacity: 0.3;
+      }
+
+      .news-card-content {
+        padding: 1.25rem;
+      }
+
+      .news-card-date {
+        font-size: 11px;
+        color: var(--text3);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-bottom: 0.5rem;
+      }
+
+      .news-card-title {
+        font-family: var(--font-display);
+        font-size: 20px;
+        letter-spacing: 0.5px;
+        line-height: 1.2;
+        margin-bottom: 0.75rem;
+        color: var(--text);
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+      }
+
+      .news-card-summary {
+        font-size: 13px;
+        color: var(--text2);
+        line-height: 1.5;
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+      }
+
+      .news-card-actions {
+        display: flex;
+        gap: 6px;
+        padding: 0.75rem 1.25rem;
+        border-top: 1px solid var(--border);
+        background: var(--surface2);
+      }
+      .news-card-actions button {
+        padding: 4px 10px;
+        font-size: 11px;
+        border-radius: 4px;
+        cursor: pointer;
+        border: 1px solid var(--border);
+        background: var(--surface);
+        color: var(--text2);
+        transition: all 0.15s;
+      }
+      .news-card-actions button:hover {
+        background: var(--red);
+        border-color: var(--red);
+        color: #fff;
+      }
+      .news-card-actions button.edit:hover {
+        background: var(--green);
+        border-color: var(--green);
+      }
+
+      /* News Detail Modal */
+      .news-detail-image {
+        width: 100%;
+        height: 250px;
+        background: var(--surface2);
+        border-radius: 8px;
+        margin-bottom: 1.5rem;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .news-detail-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+      .news-detail-image-placeholder {
+        font-size: 64px;
+        opacity: 0.3;
+      }
+
+      .news-detail-content {
+  font-size: 15px;
+  line-height: 1.8;
+  color: var(--text2);
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  word-break: break-word;       /* Дополнительный перенос */
+  hyphens: auto;                /* Переносы через дефис */
+  max-width: 100%;
+  padding-right: 1rem;
+}
+#modal-news-detail .modal-body {
+  overflow-x: hidden;
+}
+
+      /* News Admin Table */
+      .news-admin-table td {
+        vertical-align: middle;
+      }
+      .news-admin-table .news-title-cell {
+        max-width: 300px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
       /* Responsive */
       @media (max-width: 768px) {
         nav {
@@ -1305,9 +1570,19 @@
         .header-nav {
           padding: 0 1rem;
         }
+        .news-grid {
+          grid-template-columns: 1fr;
+        }
+        .news-section {
+          padding: 1rem;
+        }
+        .news-hero {
+          padding: 2rem 1rem 1rem;
+        }
       }
     </style>
-  </head>
+  <base target="_blank">
+</head>
   <body>
     <!-- Loading Overlay -->
     <div class="loading-overlay" id="loading-overlay">
@@ -1412,7 +1687,7 @@
             onclick="app.navigate('home')"
             title="Главная страница с гонками"
           >
-            Home
+            Главная
           </button>
         </div>
         <div class="hnav-item">
@@ -1460,19 +1735,9 @@
         <section class="hero">
           <h1>Гонки<br /><span>Скорость</span><br />Победа</h1>
           <p class="hero-sub">
-            Регистрируйтесь на гонки, следите за результатами и участвуйте в
-            соревнованиях.
+            Регистрируйтесь на гонки, следите за результатами и участвуйте
           </p>
-          <div class="hero-stats">
-            <div>
-              <div class="hero-stat-label">Кол-во сессий</div>
-              <div class="hero-stat-val" id="stat-races">—</div>
-            </div>
-            <div>
-              <div class="hero-stat-label">Участников</div>
-              <div class="hero-stat-val" id="stat-users">—</div>
-            </div>
-          </div>
+
         </section>
 
         <!-- ADMIN PANEL -->
@@ -1534,10 +1799,10 @@
         <div class="filter-bar">
           <button class="filter-chip" data-filter="all">Все гонки</button>
           <button class="filter-chip active" data-filter="Регистрация">
-            Открытые
+            Регистрация
           </button>
           <button class="filter-chip" data-filter="Завершена">
-            Завершённые
+            Результаты
           </button>
           
         </div>
@@ -1600,13 +1865,75 @@
         </section>
       </div>
 
-      <!-- НОВОСТИ -->
+      <!-- НОВОСТИ PAGE -->
       <div id="page-news" class="page">
-        <div class="placeholder-page">
-          <h1>Новости</h1>
-          <p>Новости, анонсы гонок и обновления.</p>
-          <p style="margin-top: 2rem; color: var(--text3)"></p>
-        </div>
+        <!-- News Hero -->
+        <section class="news-hero">
+          <h1>Новости<br /><span>F1 Online</span></h1>
+          <p class="hero-sub">
+            Последние новости, анонсы гонок и обновления проекта.
+          </p>
+        </section>
+
+        <!-- NEWS ADMIN PANEL (only for superusers) -->
+        <section class="news-admin-panel" id="news-admin-panel">
+          <div class="section-header">
+            <span class="section-title">Панель управления новостями</span>
+          </div>
+          <div class="admin-grid" style="grid-template-columns: repeat(2, 1fr);">
+            <div class="admin-stat">
+              <div class="admin-stat-label">Всего новостей</div>
+              <div class="admin-stat-val" id="news-admin-stat-total">—</div>
+            </div>
+            <div class="admin-stat">
+              <div class="admin-stat-label">Последняя</div>
+              <div class="admin-stat-val red" id="news-admin-stat-latest">—</div>
+            </div>
+          </div>
+
+          <div class="admin-actions">
+            <button class="btn btn-red" onclick="app.openCreateNewsModal()">
+              + Создать новость
+            </button>
+          </div>
+
+          <!-- News Admin Table -->
+          <div class="section-header">
+            <span class="section-title">Управление новостями</span>
+          </div>
+          <div style="overflow-x: auto">
+            <table class="admin-table news-admin-table" id="admin-news-table">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Заголовок</th>
+                  <th>Дата</th>
+                  <th>Действия</th>
+                </tr>
+              </thead>
+              <tbody id="admin-news-tbody">
+                <tr>
+                  <td colspan="4" style="text-align: center; color: var(--text3)">
+                    Загрузка...
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- NEWS GRID -->
+        <section class="news-section">
+          <div class="section-header">
+            <span class="section-title">Последние новости</span>
+            <span class="section-count" id="news-count">Загрузка...</span>
+          </div>
+          <div class="news-grid" id="news-grid">
+            <div class="empty-state">
+              <div class="skeleton" style="height: 200px"></div>
+            </div>
+          </div>
+        </section>
       </div>
 
       <!-- СКАЧАТЬ -->
@@ -1656,9 +1983,6 @@
               </tbody>
             </table>
           </div>
-
-          <!-- Таблица начисления очков -->
-          
         </section>
       </div>
     </main>
@@ -2086,6 +2410,148 @@
       </div>
     </div>
 
+    <!-- CREATE NEWS MODAL -->
+    <div class="modal-overlay" id="modal-create-news">
+      <div class="modal wide">
+        <div class="modal-header">
+          <div class="modal-title">Создать новость</div>
+          <button class="modal-close" onclick="app.closeModal('modal-create-news')">
+            ✕
+          </button>
+        </div>
+        <div class="modal-body">
+          <form id="form-create-news" onsubmit="app.handleCreateNews(event)">
+            <div class="form-group">
+              <label class="form-label">Заголовок</label>
+              <input
+                class="form-input"
+                type="text"
+                name="title"
+                placeholder="Заголовок новости"
+                required
+              />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Краткое описание</label>
+              <input
+                class="form-input"
+                type="text"
+                name="summary"
+                placeholder="Краткое описание для карточки новости"
+              />
+            </div>
+            <div class="form-group">
+              <label class="form-label">URL изображения (опционально)</label>
+              <input
+                class="form-input"
+                type="url"
+                name="image_url"
+                placeholder="https://example.com/image.jpg"
+              />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Полный текст новости</label>
+              <textarea
+                class="form-input"
+                rows="8"
+                name="content"
+                placeholder="Напишите полный текст новости..."
+                required
+              ></textarea>
+            </div>
+            <div class="form-error" id="error-create-news"></div>
+            <div style="display: flex; gap: 10px; margin-top: 0.5rem">
+              <button type="submit" class="btn btn-red" id="btn-submit-create-news">
+                Создать
+              </button>
+              <button
+                type="button"
+                class="btn btn-ghost"
+                onclick="app.closeModal('modal-create-news')"
+              >
+                Отмена
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- EDIT NEWS MODAL -->
+    <div class="modal-overlay" id="modal-edit-news">
+      <div class="modal wide">
+        <div class="modal-header">
+          <div class="modal-title">Редактировать новость</div>
+          <button class="modal-close" onclick="app.closeModal('modal-edit-news')">
+            ✕
+          </button>
+        </div>
+        <div class="modal-body">
+          <form id="form-edit-news" onsubmit="app.handleEditNews(event)">
+            <input type="hidden" name="news_id" id="edit-news-id" />
+            <div class="form-group">
+              <label class="form-label">Заголовок</label>
+              <input class="form-input" type="text" name="title" required />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Краткое описание</label>
+              <input class="form-input" type="text" name="summary" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">URL изображения (опционально)</label>
+              <input class="form-input" type="url" name="image_url" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Полный текст новости</label>
+              <textarea
+                class="form-input"
+                rows="8"
+                name="content"
+                required
+              ></textarea>
+            </div>
+            <div class="form-error" id="error-edit-news"></div>
+            <div style="display: flex; gap: 10px; margin-top: 0.5rem">
+              <button type="submit" class="btn btn-red" id="btn-submit-edit-news">
+                Сохранить
+              </button>
+              <button
+                type="button"
+                class="btn btn-ghost"
+                onclick="app.closeModal('modal-edit-news')"
+              >
+                Отмена
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- NEWS DETAIL MODAL -->
+    <div class="modal-overlay" id="modal-news-detail">
+      <div class="modal wide">
+        <div class="modal-header">
+          <div>
+            <div class="modal-title" id="news-detail-title"></div>
+          </div>
+          <button class="modal-close" onclick="app.closeModal('modal-news-detail')">
+            ✕
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="modal-meta" id="news-detail-meta"></div>
+          <div class="news-detail-image" id="news-detail-image"></div>
+          <div class="news-detail-content" id="news-detail-content"></div>
+          <div class="modal-action" style="margin-top: 1.5rem;">
+            <button class="btn btn-ghost" onclick="app.closeModal('modal-news-detail')">
+              Закрыть
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- TOAST -->
     <div class="toast" id="toast"></div>
 
@@ -2270,6 +2736,35 @@
         async getLeaderboard() {
           return this.request("/auth/users/leaderboard");
         }
+
+        // News
+        async getNews() {
+          return this.request("/news/");
+        }
+
+        async getNewsItem(id) {
+          return this.request(`/news/${id}`);
+        }
+
+        async createNews(data) {
+          return this.request("/news/", {
+            method: "POST",
+            body: data,
+          });
+        }
+
+        async updateNews(id, data) {
+          return this.request(`/news/${id}`, {
+            method: "PATCH",
+            body: data,
+          });
+        }
+
+        async deleteNews(id) {
+          return this.request(`/news/${id}`, {
+            method: "DELETE",
+          });
+        }
       }
 
       // ==========================================
@@ -2281,9 +2776,12 @@
           this.state = {
             user: null,
             races: [],
+            news: [],
             currentFilter: "Регистрация",
             currentRace: null,
+            currentNews: null,
             editingRace: null,
+            editingNews: null,
             participants: new Map(),
             registrations: new Set(),
           };
@@ -2305,7 +2803,7 @@
 
           this.updateAuthUI();
           await this.loadRaces();
-          this.updateStats();
+          
 
           document.getElementById("loading-overlay").classList.add("hidden");
         }
@@ -2363,6 +2861,8 @@
             this.renderProfile();
           } else if (page === "pilotstats") {
             this.loadLeaderboard();
+          } else if (page === "news") {
+            this.loadNews();
           }
 
           if (page !== "home") {
@@ -2425,6 +2925,17 @@
             } catch (e) {
               console.error("Failed to load participants for race", race.id);
             }
+          }
+        }
+
+        async loadNews() {
+          try {
+            this.state.news = await this.api.getNews();
+            this.renderNews();
+            this.updateNewsAdminStats();
+            this.renderNewsAdminTable();
+          } catch (error) {
+            this.showToast(error.message, true);
           }
         }
 
@@ -2952,7 +3463,7 @@
                 const results = await this.api.getRaceResults(id);
                 if (results.results && results.results.length > 0) {
                   resultsWrap.style.display = "block";
-                  const POINTS_TABLE = {1: 30, 2: 25, 3: 20, 4: 17, 5: 16, 6: 15, 7: 14, 8: 13, 9: 12, 10: 11, 11: 10, 12: 9, 13: 8, 14: 7, 15: 6, 16: 5, 17: 4, 18: 3, 19: 2, 20: 1}
+                  const POINTS_TABLE = {1:30, 2:25, 3:20, 4:17, 5:14, 6:12, 7:10, 8:8, 9:5, 10:2, 11:-2, 12:-5, 13:-8, 14:-10, 15:-12, 16:-14, 17:-17, 18:-20, 19:-25, 20:-30}
                   ;
                   document.getElementById("detail-results-body").innerHTML =
                     results.results
@@ -3082,20 +3593,6 @@
 
         // Загрузка таблицы лидеров
         async loadLeaderboard() {
-          // Таблица очков
-          const POINTS = {1:25,2:18,3:15,4:12,5:10,6:8,7:6,8:4,9:2,10:1};
-          const COLORS = {1:'#ffc107',2:'#b0c4de',3:'#cd7f32'};
-          const pointsGrid = document.getElementById('points-table-grid');
-          if (pointsGrid && !pointsGrid.dataset.rendered) {
-            pointsGrid.dataset.rendered = '1';
-            pointsGrid.innerHTML = Object.entries(POINTS).map(([pos, pts]) => `
-              <div style="background: var(--surface); padding: 0.9rem 0.75rem; flex: 1; min-width: 56px; text-align: center;">
-                <div style="font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: var(--text3); margin-bottom: 4px;">${pos}</div>
-                <div style="font-family: var(--font-display); font-size: 22px; ${COLORS[pos] ? `color:${COLORS[pos]};` : 'color:var(--text2);'}">${pts}</div>
-              </div>
-            `).join('');
-          }
-
           try {
             const users = await this.api.getLeaderboard();
             const tbody = document.getElementById('leaderboard-tbody');
@@ -3137,7 +3634,6 @@
                       </div>
                       <div>
                         <div style="font-weight: 500;">${user.email.split('@')[0]}</div>
-                        <div style="font-size: 11px; color: var(--text3);">${user.email}</div>
                       </div>
                     </div>
                   </td>
@@ -3226,15 +3722,7 @@
           }
         }
 
-        updateStats() {
-          document.getElementById("stat-races").textContent =
-            this.state.races.length;
-          const totalUsers = this.state.races.reduce(
-            (sum, r) => sum + r.users,
-            0
-          );
-          document.getElementById("stat-users").textContent = totalUsers;
-        }
+
 
         updateAdminStats() {
           if (!this.state.user?.is_superuser) return;
@@ -3335,6 +3823,233 @@
           toast.textContent = message;
           toast.className = "toast show" + (isError ? " error" : "");
           setTimeout(() => (toast.className = "toast"), 3000);
+        }
+
+        // ==========================================
+        // NEWS FUNCTIONS (упрощённые)
+        // ==========================================
+        
+        renderNews() {
+          const grid = document.getElementById("news-grid");
+          const newsList = this.state.news;
+
+          document.getElementById("news-count").textContent = `${
+            newsList.length
+          } ${this.pluralize(newsList.length, "новость", "новости", "новостей")}`;
+
+          if (newsList.length === 0) {
+            grid.innerHTML = `
+              <div class="empty-state" style="grid-column: 1/-1;">
+                <div class="empty-state-icon">📰</div>
+                <p>Пока нет новостей</p>
+              </div>`;
+            return;
+          }
+
+          const isAdmin = this.state.user?.is_superuser;
+
+          grid.innerHTML = newsList
+            .map((news) => {
+              const imageHtml = news.image_url 
+                ? `<img src="${news.image_url}" alt="${news.title}" onerror="this.style.display='none'; this.parentElement.innerHTML='<div class=\\'news-card-image-placeholder\\'>📰</div>';">`
+                : '<div class="news-card-image-placeholder">📰</div>';
+              
+              const adminActions = isAdmin 
+                ? `
+                  <div class="news-card-actions">
+                    <button class="edit" onclick="event.stopPropagation(); app.openEditNewsModal(${news.id})" title="Редактировать">✎</button>
+                    <button class="danger" onclick="event.stopPropagation(); app.deleteNews(${news.id})" title="Удалить">🗑</button>
+                  </div>
+                `
+                : '';
+
+              return `
+                <div class="news-card" onclick="app.openNewsDetail(${news.id})">
+                  <div class="news-card-image">
+                    ${imageHtml}
+                  </div>
+                  <div class="news-card-content">
+                    <div class="news-card-date">
+                      📅 ${this.formatDate(news.created_at)}
+                    </div>
+                    <h3 class="news-card-title">${news.title}</h3>
+                    <p class="news-card-summary">${news.summary || news.content.substring(0, 150)}...</p>
+                  </div>
+                  ${adminActions}
+                </div>
+              `;
+            })
+            .join("");
+        }
+
+        updateNewsAdminStats() {
+          if (!this.state.user?.is_superuser) {
+            document.getElementById("news-admin-panel").classList.remove("visible");
+            return;
+          }
+
+          document.getElementById("news-admin-panel").classList.add("visible");
+
+          const total = this.state.news.length;
+          const latest = this.state.news.length > 0 
+            ? this.formatDate(this.state.news[0].created_at).split(',')[0]
+            : '—';
+
+          document.getElementById("news-admin-stat-total").textContent = total;
+          document.getElementById("news-admin-stat-latest").textContent = latest;
+        }
+
+        renderNewsAdminTable() {
+          if (!this.state.user?.is_superuser) return;
+
+          const tbody = document.getElementById("admin-news-tbody");
+          if (this.state.news.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: var(--text3);">Нет новостей</td></tr>';
+            return;
+          }
+
+          tbody.innerHTML = this.state.news
+            .map((news) => `
+              <tr>
+                <td>${news.id}</td>
+                <td class="news-title-cell" title="${news.title}">${news.title}</td>
+                <td>${this.formatDate(news.created_at)}</td>
+                <td>
+                  <div class="admin-actions-cell">
+                    <button class="admin-btn edit" onclick="app.openEditNewsModal(${news.id})">Редактировать</button>
+                    <button class="admin-btn danger" onclick="app.deleteNews(${news.id})">Удалить</button>
+                  </div>
+                </td>
+              </tr>
+            `)
+            .join("");
+        }
+
+        openCreateNewsModal() {
+          if (!this.state.user?.is_superuser) {
+            this.showToast("Только администраторы могут создавать новости", true);
+            return;
+          }
+          document.getElementById("form-create-news").reset();
+          this.openModal("modal-create-news");
+        }
+
+        async openEditNewsModal(newsId) {
+          if (!this.state.user?.is_superuser) {
+            this.showToast("Только администраторы могут редактировать новости", true);
+            return;
+          }
+
+          try {
+            const news = await this.api.getNewsItem(newsId);
+            this.state.editingNews = news;
+
+            document.getElementById("edit-news-id").value = news.id;
+            const form = document.getElementById("form-edit-news");
+            form.title.value = news.title;
+            form.summary.value = news.summary || "";
+            form.content.value = news.content;
+            form.image_url.value = news.image_url || "";
+
+            this.openModal("modal-edit-news");
+          } catch (error) {
+            this.showToast(error.message, true);
+          }
+        }
+
+        async openNewsDetail(newsId) {
+          try {
+            const news = await this.api.getNewsItem(newsId);
+            this.state.currentNews = news;
+
+            document.getElementById("news-detail-title").textContent = news.title;
+            
+            const metaHtml = `
+              <div class="modal-meta-chip">📅 ${this.formatDate(news.created_at)}</div>
+            `;
+            document.getElementById("news-detail-meta").innerHTML = metaHtml;
+
+            const imageContainer = document.getElementById("news-detail-image");
+            if (news.image_url) {
+              imageContainer.innerHTML = `<img src="${news.image_url}" alt="${news.title}" onerror="this.style.display='none'; this.parentElement.innerHTML='<div class=\\'news-detail-image-placeholder\\'>📰</div>';">`;
+            } else {
+              imageContainer.innerHTML = '<div class="news-detail-image-placeholder">📰</div>';
+            }
+
+            document.getElementById("news-detail-content").textContent = news.content;
+
+            this.openModal("modal-news-detail");
+          } catch (error) {
+            this.showToast(error.message, true);
+          }
+        }
+
+        async handleCreateNews(e) {
+          e.preventDefault();
+          const form = e.target;
+          const btn = document.getElementById("btn-submit-create-news");
+          btn.disabled = true;
+
+          const data = {
+            title: form.title.value,
+            summary: form.summary.value,
+            content: form.content.value,
+            image_url: form.image_url.value || null,
+          };
+
+          try {
+            await this.api.createNews(data);
+            this.closeModal("modal-create-news");
+            this.showToast("Новость создана!");
+            await this.loadNews();
+            form.reset();
+          } catch (error) {
+            document.getElementById("error-create-news").textContent = error.message;
+            document.getElementById("error-create-news").classList.add("visible");
+          } finally {
+            btn.disabled = false;
+          }
+        }
+
+        async handleEditNews(e) {
+          e.preventDefault();
+          const form = e.target;
+          const btn = document.getElementById("btn-submit-edit-news");
+          btn.disabled = true;
+
+          const data = {
+            title: form.title.value,
+            summary: form.summary.value,
+            content: form.content.value,
+            image_url: form.image_url.value || null,
+          };
+
+          try {
+            await this.api.updateNews(this.state.editingNews.id, data);
+            this.closeModal("modal-edit-news");
+            this.showToast("Новость обновлена!");
+            await this.loadNews();
+            this.state.editingNews = null;
+          } catch (error) {
+            document.getElementById("error-edit-news").textContent = error.message;
+            document.getElementById("error-edit-news").classList.add("visible");
+          } finally {
+            btn.disabled = false;
+          }
+        }
+
+        async deleteNews(newsId) {
+          if (!confirm("Вы уверены, что хотите удалить эту новость?")) {
+            return;
+          }
+
+          try {
+            await this.api.deleteNews(newsId);
+            this.showToast("Новость удалена");
+            await this.loadNews();
+          } catch (error) {
+            this.showToast(error.message, true);
+          }
         }
       }
 

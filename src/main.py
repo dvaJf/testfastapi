@@ -7,6 +7,7 @@ from typing import Optional
 
 from src.auth.router import router as auth_router
 from src.races.router import router as races_router
+from src.news.router import router as news_router
 from src.auth.utils import create_first_admin
 from src.config import settings
 from src.database import engine, Base, get_session
@@ -83,6 +84,7 @@ app.add_middleware(
 app.get("/auth/users/leaderboard", response_model=list[LeaderboardEntry], tags=["users"])(get_leaderboard)
 app.include_router(auth_router, prefix="/auth")
 app.include_router(races_router, prefix="/races",tags=["races"])
+app.include_router(news_router, prefix="/news", tags=["news"])
 
 @app.get("/")
 async def serve_index():
