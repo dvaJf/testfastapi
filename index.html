@@ -2091,129 +2091,203 @@
     </div>
 
     <!-- AUTH MODAL -->
-    <div class="modal-overlay" id="modal-auth">
-      <div class="modal">
-        <div class="modal-header" style="padding-bottom: 1rem">
-          <div class="modal-title">Аккаунт</div>
-          <button class="modal-close" onclick="app.closeModal('modal-auth')">
-            ✕
-          </button>
-        </div>
-        <div class="modal-body" style="padding-top: 0">
-          <div class="auth-tabs">
-            <button
-              class="auth-tab active"
-              data-tab="login"
-              onclick="app.switchAuthTab('login')"
-            >
-              Войти
-            </button>
-            <button
-              class="auth-tab"
-              data-tab="signup"
-              onclick="app.switchAuthTab('signup')"
-            >
-              Создать аккаунт
-            </button>
+        <!-- AUTH MODAL -->
+        <div class="modal-overlay" id="modal-auth">
+          <div class="modal">
+            <div class="modal-header" style="padding-bottom: 1rem">
+              <div class="modal-title" id="auth-modal-title">Аккаунт</div>
+              <button class="modal-close" onclick="app.closeModal('modal-auth')">
+                ✕
+              </button>
+            </div>
+            <div class="modal-body" style="padding-top: 0">
+              <div class="auth-tabs" id="auth-tabs">
+                <button
+                  class="auth-tab active"
+                  data-tab="login"
+                  onclick="app.switchAuthTab('login')"
+                >
+                  Войти
+                </button>
+                <button
+                  class="auth-tab"
+                  data-tab="signup"
+                  onclick="app.switchAuthTab('signup')"
+                >
+                  Создать аккаунт
+                </button>
+              </div>
+    
+              <!-- LOGIN -->
+              <form id="form-login" onsubmit="app.handleLogin(event)">
+                <div class="form-group">
+                  <label class="form-label">Имя</label>
+                  <input
+                    class="form-input"
+                    name="email"
+                    placeholder="Ваше имя"
+                    required
+                  />
+                  <div class="form-error" id="error-login-email"></div>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Пароль</label>
+                  <input
+                    class="form-input"
+                    type="password"
+                    name="password"
+                    placeholder="••••••••"
+                    required
+                    minlength="6"
+                  />
+                  <div class="form-error" id="error-login-password"></div>
+                </div>
+                <div style="text-align: right; margin-bottom: 1rem;">
+                  <a onclick="app.switchAuthTab('forgot')" style="color: var(--red); cursor: pointer; font-size: 12px;">
+                    Забыли пароль?
+                  </a>
+                </div>
+                <button
+                  type="submit"
+                  class="btn btn-red"
+                  style="width: 100%; margin-top: 0.5rem"
+                  id="btn-submit-login"
+                >
+                  Войти
+                </button>
+                <div class="form-footer">
+                  Нет аккаунта?
+                  <a onclick="app.switchAuthTab('signup')">Зарегистрироваться</a>
+                </div>
+              </form>
+    
+              <!-- SIGNUP -->
+              <form
+                id="form-signup"
+                style="display: none"
+                onsubmit="app.handleRegister(event)"
+              >
+                <div class="form-group">
+                  <label class="form-label">Имя</label>
+                  <input
+                    class="form-input"
+                    name="email"
+                    placeholder="Ваше имя"
+                    required
+                  />
+                  <div class="form-error" id="error-signup-email"></div>
+                </div>
+                <div class="form-row">
+                  <div class="form-group">
+                    <label class="form-label">Пароль</label>
+                    <input
+                      class="form-input"
+                      type="password"
+                      name="password"
+                      placeholder="••••••••"
+                      required
+                      minlength="6"
+                    />
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Повтор пароля</label>
+                    <input
+                      class="form-input"
+                      type="password"
+                      name="password2"
+                      placeholder="••••••••"
+                      required
+                      minlength="6"
+                    />
+                  </div>
+                </div>
+                <div class="form-error" id="error-signup-general"></div>
+                <button
+                  type="submit"
+                  class="btn btn-red"
+                  style="width: 100%; margin-top: 0.5rem"
+                  id="btn-submit-signup"
+                >
+                  Создать аккаунт
+                </button>
+                <div class="form-footer">
+                  Уже есть аккаунт?
+                  <a onclick="app.switchAuthTab('login')">Войти</a>
+                </div>
+              </form>
+    
+              <!-- FORGOT PASSWORD -->
+              <form
+                id="form-forgot"
+                style="display: none"
+                onsubmit="app.handleForgotPassword(event)"
+              >
+                <div class="form-group">
+                  <label class="form-label">Имя</label>
+                  <input
+                    class="form-input"
+                    name="email"
+                    placeholder="Ваше имя"
+                    required
+                  />
+                  <div class="form-error" id="error-forgot-email"></div>
+                </div>
+                <div class="form-error" id="error-forgot-general"></div>
+                <button
+                  type="submit"
+                  class="btn btn-red"
+                  style="width: 100%; margin-top: 0.5rem"
+                  id="btn-submit-forgot"
+                >
+                  Отправить ссылку
+                </button>
+                <div class="form-footer">
+                  <a onclick="app.switchAuthTab('login')">Вернуться к входу</a>
+                </div>
+              </form>
+    
+              <!-- RESET PASSWORD -->
+              <form
+                id="form-reset"
+                style="display: none"
+                onsubmit="app.handleResetPassword(event)"
+              >
+                <input type="hidden" name="token" id="reset-token" />
+                <div class="form-group">
+                  <label class="form-label">Новый пароль</label>
+                  <input
+                    class="form-input"
+                    type="password"
+                    name="password"
+                    placeholder="••••••••"
+                    required
+                    minlength="6"
+                  />
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Повтор пароля</label>
+                  <input
+                    class="form-input"
+                    type="password"
+                    name="password2"
+                    placeholder="••••••••"
+                    required
+                    minlength="6"
+                  />
+                </div>
+                <div class="form-error" id="error-reset-general"></div>
+                <button
+                  type="submit"
+                  class="btn btn-red"
+                  style="width: 100%; margin-top: 0.5rem"
+                  id="btn-submit-reset"
+                >
+                  Сменить пароль
+                </button>
+              </form>
+            </div>
           </div>
-
-          <!-- LOGIN -->
-          <form id="form-login" onsubmit="app.handleLogin(event)">
-            <div class="form-group">
-              <label class="form-label">Имя</label>
-              <input
-                class="form-input"
-                
-                name="email"
-                placeholder="Ваше имя"
-                required
-              />
-              <div class="form-error" id="error-login-email"></div>
-            </div>
-            <div class="form-group">
-              <label class="form-label">Пароль</label>
-              <input
-                class="form-input"
-                type="password"
-                name="password"
-                placeholder="••••••••"
-                required
-                minlength="6"
-              />
-              <div class="form-error" id="error-login-password"></div>
-            </div>
-            <button
-              type="submit"
-              class="btn btn-red"
-              style="width: 100%; margin-top: 0.5rem"
-              id="btn-submit-login"
-            >
-              Войти
-            </button>
-            <div class="form-footer">
-              Нет аккаунта?
-              <a onclick="app.switchAuthTab('signup')">Зарегистрироваться</a>
-            </div>
-          </form>
-
-          <!-- SIGNUP -->
-          <form
-            id="form-signup"
-            style="display: none"
-            onsubmit="app.handleRegister(event)"
-          >
-            <div class="form-group">
-              <label class="form-label">Имя</label>
-              <input
-                class="form-input"
-                
-                name="email"
-                placeholder="Ваше имя"
-                required
-              />
-              <div class="form-error" id="error-signup-email"></div>
-            </div>
-            <div class="form-row">
-              <div class="form-group">
-                <label class="form-label">Пароль</label>
-                <input
-                  class="form-input"
-                  type="password"
-                  name="password"
-                  placeholder="••••••••"
-                  required
-                  minlength="6"
-                />
-              </div>
-              <div class="form-group">
-                <label class="form-label">Повтор пароля</label>
-                <input
-                  class="form-input"
-                  type="password"
-                  name="password2"
-                  placeholder="••••••••"
-                  required
-                  minlength="6"
-                />
-              </div>
-            </div>
-            <div class="form-error" id="error-signup-general"></div>
-            <button
-              type="submit"
-              class="btn btn-red"
-              style="width: 100%; margin-top: 0.5rem"
-              id="btn-submit-signup"
-            >
-              Создать аккаунт
-            </button>
-            <div class="form-footer">
-              Уже есть аккаунт?
-              <a onclick="app.switchAuthTab('login')">Войти</a>
-            </div>
-          </form>
         </div>
-      </div>
-    </div>
 
     <!-- CREATE RACE MODAL -->
     <div class="modal-overlay" id="modal-create">

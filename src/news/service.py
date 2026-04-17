@@ -3,7 +3,7 @@ from sqlalchemy import select, desc
 from typing import Optional, List
 from src.news.models import News
 from src.exceptions import NotFoundException
-
+from datetime import datetime, timedelta
 
 async def get_all_news(session: AsyncSession) -> List[News]:
     query = select(News).order_by(desc(News.created_at))
@@ -32,7 +32,8 @@ async def create_news(
         content=content,
         summary=summary,
         image_url=image_url,
-        created_by=created_by
+        created_by=created_by,
+        created_at=datetime.utcnow()+timedelta(hours=3)
     )
     session.add(news)
     await session.commit()
