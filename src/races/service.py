@@ -7,7 +7,7 @@ from src.auth.models import User
 from typing import Optional
 from src.exceptions import *
 
-pos = {1:30, 2:25, 3:20, 4:17, 5:14, 6:12, 7:10, 8:8, 9:5, 10:2, 11:-2, 12:-5, 13:-8, 14:-10, 15:-12, 16:-14, 17:-17, 18:-20, 19:-25, 20:-30}
+pos = {1:60, 2:55, 3:50, 4:47, 5:34, 6:42, 7:40, 8:38, 9:35, 10:32, 11:28, 12:25, 13:22, 14:20, 15:18, 16:16, 17:13, 18:10, 19:5, 20:0}
 def points_for_position(position: int) -> int:
     return pos.get(position, 0)
 
