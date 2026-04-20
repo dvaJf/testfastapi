@@ -421,7 +421,21 @@
         background: var(--border);
         margin: 4px 0;
       }
-
+      #home-news-grid {
+          grid-template-columns: 1fr !important;
+        }
+      #home-news-grid {
+          grid-template-columns: 1fr !important;
+          gap: 1rem !important;
+      }
+      #home-news-grid {
+        display: grid !important;
+        grid-template-columns: repeat(3, 1fr) !important;
+        gap: 1rem !important;
+      }
+      #home-news-grid .news-card {
+        min-width: 0;
+      }
       /* User pill in top-right when logged in */
       .user-menu {
         display: flex;
@@ -1739,7 +1753,18 @@
           </p>
 
         </section>
-
+                <!-- HOME NEWS SECTION -->
+        <section class="races-section" id="home-news-section" style="padding-top: 0; padding-bottom: 1rem;">
+          <div class="section-header">
+            <span class="section-title">Последние новости</span>
+            <button class="nav-btn" style="font-size: 12px; padding: 4px 12px;" onclick="app.navigate('news')">Все новости →</button>
+          </div>
+          <div class="news-grid" id="home-news-grid" style="grid-template-columns: repeat(3, 1fr);">
+            <div class="empty-state" style="grid-column: 1/-1;">
+              <div class="skeleton" style="height: 160px;"></div>
+            </div>
+          </div>
+        </section>
         <!-- ADMIN PANEL -->
         <section class="admin-panel" id="admin-panel">
           <div class="section-header">
@@ -2877,8 +2902,8 @@
 
           this.updateAuthUI();
           await this.loadRaces();
+          await this.loadHomeNews();
           
-
           document.getElementById("loading-overlay").classList.add("hidden");
         }
 
@@ -3955,7 +3980,53 @@
             })
             .join("");
         }
+        async loadHomeNews() {
+          try {
+            if (this.state.news.length === 0) {
+              this.state.news = await this.api.getNews();
+            }
+            this.renderHomeNews();
+          } catch (error) {
+            console.error('Failed to load home news:', error);
+          }
+        }
 
+        renderHomeNews() {
+          const grid = document.getElementById("home-news-grid");
+          const newsList = this.state.news.slice(0, 3);
+
+          if (newsList.length === 0) {
+            grid.innerHTML = `
+              <div class="empty-state" style="grid-column: 1/-1;">
+                <div class="empty-state-icon">📰</div>
+                <p>Пока нет новостей</p>
+              </div>`;
+            return;
+          }
+
+          grid.innerHTML = newsList
+            .map((news) => {
+              const imageHtml = news.image_url 
+                ? `<img src="${news.image_url}" alt="${news.title}" onerror="this.style.display='none'; this.parentElement.innerHTML='<div class=\\'news-card-image-placeholder\\'>📰</div>';">`
+                : '<div class="news-card-image-placeholder">📰</div>';
+              
+              return `
+                <div class="news-card" onclick="app.openNewsDetail(${news.id})" style="cursor: pointer; min-width: 0;">
+                  <div class="news-card-image" style="height: 140px;">
+                    ${imageHtml}
+                  </div>
+                  <div class="news-card-content" style="padding: 1rem;">
+                    <div class="news-card-date" style="font-size: 10px;">
+                      📅 ${this.formatDate(news.created_at)}
+                    </div>
+                    <h3 class="news-card-title" style="font-size: 16px; margin-bottom: 0.5rem;">${news.title}</h3>
+                    <p class="news-card-summary" style="font-size: 12px; -webkit-line-clamp: 2;">${news.summary || news.content.substring(0, 120)}...</p>
+                  </div>
+                </div>
+              `;
+            })
+            .join('');
+        }
         updateNewsAdminStats() {
           if (!this.state.user?.is_superuser) {
             document.getElementById("news-admin-panel").classList.remove("visible");
