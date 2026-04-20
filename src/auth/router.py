@@ -1,7 +1,5 @@
 from src.auth.schemas import UserCreate, UserRead, UserUpdate
 from src.auth.service import auth_backend, fastapi_users
-from pydantic import BaseModel
-from typing import Optional
 from fastapi import APIRouter
 router = APIRouter()
 
@@ -18,11 +16,3 @@ router.include_router(
     prefix="/users",
     tags=["users"],
 )
-
-class LeaderboardEntry(BaseModel):
-    position: int
-    user_id: int
-    email: str
-    score: int
-    races_completed: Optional[int] = 0
-    best_position: Optional[int] = None

@@ -71,11 +71,6 @@ class RaceUpdate(BaseModel):
 class ReviewIn(BaseModel):
     vote: int
 
-    @field_validator("vote")
-    @classmethod
-    def vote_must_be_valid(cls, v: int) -> int:
-        return v
-
 
 class ReviewOut(BaseModel):
     race_id: int

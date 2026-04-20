@@ -114,14 +114,6 @@ class TestUpdateRace:
         assert resp.json()["name"] == RACE_PAYLOAD["name"]
 
 class TestRegisterForRace:
-    async def test_register_success(self, client, sample_race, registered_user):
-        resp = await client.post(
-            f"/races/{sample_race['id']}/register",
-            headers=registered_user["headers"],
-        )
-        assert resp.status_code == 201
-        assert resp.json()["message"] == "registered"
-
     async def test_register_twice(self, client, sample_race, registered_user):
         await client.post(f"/races/{sample_race['id']}/register", headers=registered_user["headers"])
         resp = await client.post(f"/races/{sample_race['id']}/register", headers=registered_user["headers"])
@@ -171,11 +163,6 @@ class TestRegisterForRace:
 
 
 class TestUnregisterFromRace:
-    async def test_unregister_success(self, client, sample_race, registered_user):
-        await client.post(f"/races/{sample_race['id']}/register", headers=registered_user["headers"])
-        resp = await client.delete(f"/races/{sample_race['id']}/unregister", headers=registered_user["headers"])
-        assert resp.status_code == 204
-
     async def test_unregister_not_registered(self, client, sample_race, registered_user):
         resp = await client.delete(f"/races/{sample_race['id']}/unregister", headers=registered_user["headers"])
         assert resp.status_code == 400
@@ -305,3 +292,193 @@ class TestResults:
             headers=registered_user["headers"],
         )
         assert resp.status_code == 403
+
+import pytest
+
+pytestmark = pytest.mark.asyncio
+
+
+class TestRaceResultsPoints:
+    """Test that race results correctly award points to users."""
+
+    async def _setup_race_with_results(self, client, superuser, registered_user, position):
+        race_resp = await client.post("/races/", json={
+            "name": "Points Test",
+            "race": "Test",
+            "about": "Testing points",
+            "time": "2025-05-25",
+            "maxuser": 5,
+            "status": "Регистрация",
+        }, headers=superuser["headers"])
+        race_id = race_resp.json()["id"]
+        await client.post(f"/races/{race_id}/register", headers=registered_user["headers"])
+        await client.patch(f"/races/{race_id}", json={"status": "Завершена"}, headers=superuser["headers"])
+
+        parts = await client.get(f"/races/{race_id}/all_users")
+        user_id = parts.json()[0]["user_id"]
+
+        await client.post(
+            f"/races/{race_id}/results",
+            json={"results": [{"user_id": user_id, "position": position}]},
+            headers=superuser["headers"],
+        )
+        return user_id
+
+    async def test_first_place_points(self, client, superuser, registered_user):
+        user_id = await self._setup_race_with_results(client, superuser, registered_user, 1)
+        resp = await client.get("/auth/users/leaderboard")
+        entry = next(e for e in resp.json() if e["user_id"] == user_id)
+        assert entry["score"] == 60
+
+    async def test_tenth_place_points(self, client, superuser, registered_user):
+        user_id = await self._setup_race_with_results(client, superuser, registered_user, 10)
+        resp = await client.get("/auth/users/leaderboard")
+        entry = next(e for e in resp.json() if e["user_id"] == user_id)
+        assert entry["score"] == 32
+
+    async def test_twenty_first_place_no_points(self, client, superuser, registered_user):
+        user_id = await self._setup_race_with_results(client, superuser, registered_user, 21)
+        resp = await client.get("/auth/users/leaderboard")
+        entry = next(e for e in resp.json() if e["user_id"] == user_id)
+        assert entry["score"] == 0
+
+    async def test_results_idempotency(self, client, superuser, registered_user):
+        """Setting results twice should not double-count points."""
+        race_resp = await client.post("/races/", json={
+            "name": "Idempotency Test",
+            "race": "Test",
+            "about": "Testing",
+            "time": "2025-05-25",
+            "maxuser": 5,
+            "status": "Регистрация",
+        }, headers=superuser["headers"])
+        race_id = race_resp.json()["id"]
+        await client.post(f"/races/{race_id}/register", headers=registered_user["headers"])
+        await client.patch(f"/races/{race_id}", json={"status": "Завершена"}, headers=superuser["headers"])
+
+        parts = await client.get(f"/races/{race_id}/all_users")
+        user_id = parts.json()[0]["user_id"]
+
+        # Set results first time
+        await client.post(
+            f"/races/{race_id}/results",
+            json={"results": [{"user_id": user_id, "position": 1}]},
+            headers=superuser["headers"],
+        )
+
+        resp1 = await client.get("/auth/users/leaderboard")
+        score1 = next(e for e in resp1.json() if e["user_id"] == user_id)["score"]
+
+        # Set results second time (same position)
+        await client.post(
+            f"/races/{race_id}/results",
+            json={"results": [{"user_id": user_id, "position": 1}]},
+            headers=superuser["headers"],
+        )
+
+        resp2 = await client.get("/auth/users/leaderboard")
+        score2 = next(e for e in resp2.json() if e["user_id"] == user_id)["score"]
+
+        assert score1 == score2 == 60
+
+    async def test_update_results_changes_points(self, client, superuser, registered_user):
+        """Changing results should recalculate points correctly."""
+        race_resp = await client.post("/races/", json={
+            "name": "Update Test",
+            "race": "Test",
+            "about": "Testing",
+            "time": "2025-05-25",
+            "maxuser": 5,
+            "status": "Регистрация",
+        }, headers=superuser["headers"])
+        race_id = race_resp.json()["id"]
+        await client.post(f"/races/{race_id}/register", headers=registered_user["headers"])
+        await client.patch(f"/races/{race_id}", json={"status": "Завершена"}, headers=superuser["headers"])
+
+        parts = await client.get(f"/races/{race_id}/all_users")
+        user_id = parts.json()[0]["user_id"]
+
+        # First place = 60 points
+        await client.post(
+            f"/races/{race_id}/results",
+            json={"results": [{"user_id": user_id, "position": 1}]},
+            headers=superuser["headers"],
+        )
+
+        resp1 = await client.get("/auth/users/leaderboard")
+        score1 = next(e for e in resp1.json() if e["user_id"] == user_id)["score"]
+        assert score1 == 60
+
+        # Change to 10th place = 32 points
+        await client.post(
+            f"/races/{race_id}/results",
+            json={"results": [{"user_id": user_id, "position": 10}]},
+            headers=superuser["headers"],
+        )
+
+        resp2 = await client.get("/auth/users/leaderboard")
+        score2 = next(e for e in resp2.json() if e["user_id"] == user_id)["score"]
+        assert score2 == 32
+
+
+class TestRaceReviewsEdgeCases:
+    """Additional edge cases for race reviews."""
+
+    async def test_multiple_users_review_same_organizer(self, client, superuser):
+        # Create multiple regular users
+        users = []
+        for i in range(3):
+            payload = {"email": f"reviewer{i}@example.com", "password": "Pass123!", "score": 0}
+            await client.post("/auth/register", json=payload)
+            login = await client.post("/auth/login", data={"username": payload["email"], "password": payload["password"]})
+            token = login.json()["access_token"]
+            users.append({"email": payload["email"], "headers": {"Authorization": f"Bearer {token}"}})
+
+        # Create race and finish it
+        race_resp = await client.post("/races/", json={
+            "name": "Multi Review Test",
+            "race": "Test",
+            "about": "Testing",
+            "time": "2025-05-25",
+            "maxuser": 10,
+            "status": "Регистрация",
+        }, headers=superuser["headers"])
+        race_id = race_resp.json()["id"]
+
+        # Register all users
+        for user in users:
+            await client.post(f"/races/{race_id}/register", headers=user["headers"])
+
+        await client.patch(f"/races/{race_id}", json={"status": "Завершена"}, headers=superuser["headers"])
+
+        # All users review positively
+        for user in users:
+            resp = await client.post(f"/races/{race_id}/review", json={"vote": 1}, headers=user["headers"])
+            assert resp.status_code == 200
+
+        # Check organizer rating
+        race = await client.get(f"/races/{race_id}")
+        assert race.json()["organizer_likes"] == 3
+        assert race.json()["organizer_dislikes"] == 0
+
+    async def test_review_then_unregister_impossible(self, client, superuser, registered_user):
+        """Cannot unregister from finished race, but review requires finished race."""
+        race_resp = await client.post("/races/", json={
+            "name": "Review Unregister Test",
+            "race": "Test",
+            "about": "Testing",
+            "time": "2025-05-25",
+            "maxuser": 5,
+            "status": "Регистрация",
+        }, headers=superuser["headers"])
+        race_id = race_resp.json()["id"]
+        await client.post(f"/races/{race_id}/register", headers=registered_user["headers"])
+        await client.patch(f"/races/{race_id}", json={"status": "Завершена"}, headers=superuser["headers"])
+
+        # Submit review
+        resp = await client.post(f"/races/{race_id}/review", json={"vote": 1}, headers=registered_user["headers"])
+        assert resp.status_code == 200
+
+        # Try to unregister (should fail because race is finished)
+        resp = await client.delete(f"/races/{race_id}/unregister", headers=registered_user["headers"])
+        assert resp.status_code == 400

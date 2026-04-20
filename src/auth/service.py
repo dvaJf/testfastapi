@@ -4,7 +4,7 @@ from fastapi_users.authentication import AuthenticationBackend, BearerTransport,
 from fastapi_users.db import SQLAlchemyUserDatabase
 from fastapi_users.manager import BaseUserManager, IntegerIDMixin  
 from sqlalchemy.ext.asyncio import AsyncSession
-from src.auth.config import SECRET
+from src.auth.config import SECRET, ACCESS_TOKEN_EXPIRE
 from src.auth.models import User
 from src.database import get_session
 
@@ -25,7 +25,7 @@ async def get_user_manager(user_db=Depends(get_user_db)):
 auth_backend = AuthenticationBackend(
     name="jwt",
     transport=BearerTransport(tokenUrl="/auth/login"),
-    get_strategy=lambda: JWTStrategy(secret=SECRET, lifetime_seconds=3600),
+    get_strategy=lambda: JWTStrategy(secret=SECRET, lifetime_seconds=ACCESS_TOKEN_EXPIRE),
 )
 
 fastapi_users = FastAPIUsers[User, int](get_user_manager, [auth_backend])

@@ -2634,7 +2634,7 @@
       // CONFIGURATION
       // ==========================================
       const CONFIG = {
-        API_URL: "https://f1u.vercel.app",
+        API_URL: "http://localhost:8000",
         TOKEN_KEY: "f1_access_token",
         REFRESH_KEY: "f1_refresh_token",
       };
@@ -3537,7 +3537,7 @@
                 const results = await this.api.getRaceResults(id);
                 if (results.results && results.results.length > 0) {
                   resultsWrap.style.display = "block";
-                  const POINTS_TABLE = {1:60, 2:55, 3:50, 4:47, 5:34, 6:42, 7:40, 8:38, 9:35, 10:32, 11:28, 12:25, 13:22, 14:20, 15:18, 16:16, 17:13, 18:10, 19:5, 20:0}
+                  const POINTS_TABLE = {1:60, 2:55, 3:50, 4:47, 5:44, 6:42, 7:40, 8:38, 9:35, 10:32, 11:28, 12:25, 13:22, 14:20, 15:18, 16:16, 17:13, 18:10, 19:5, 20:0}
                   ;
                   document.getElementById("detail-results-body").innerHTML =
                     results.results

@@ -7,14 +7,12 @@ from src.auth.models import User
 from typing import Optional
 from src.exceptions import *
 
-pos = {1:60, 2:55, 3:50, 4:47, 5:34, 6:42, 7:40, 8:38, 9:35, 10:32, 11:28, 12:25, 13:22, 14:20, 15:18, 16:16, 17:13, 18:10, 19:5, 20:0}
-def points_for_position(position: int) -> int:
+pos = {1:60, 2:55, 3:50, 4:47, 5:44, 6:42, 7:40, 8:38, 9:35, 10:32, 11:28, 12:25, 13:22, 14:20, 15:18, 16:16, 17:13, 18:10, 19:5, 20:0}
+def points_for_position(position):
     return pos.get(position, 0)
 
 async def get_all_races_with_creator(session: AsyncSession):
-    result = await session.execute(
-        select(Race).options(selectinload(Race.creator))
-    )
+    result = await session.execute(select(Race).options(selectinload(Race.creator)))
     return result.scalars().all()
 
 async def get_race(id: int, session: AsyncSession):
@@ -25,46 +23,25 @@ async def get_race(id: int, session: AsyncSession):
     return race
 
 async def get_race_with_creator(id: int, session: AsyncSession):
-    result = await session.execute(
-        select(Race).where(Race.id == id).options(selectinload(Race.creator))
-    )
+    result = await session.execute(select(Race).where(Race.id == id).options(selectinload(Race.creator)))
     race = result.scalar_one_or_none()
     if race is None:
         raise NotFoundException()
     return race
 
 async def create_race(name: str, race: str, about: Optional[str], time: datetime, maxuser: int, status: str, created_by: int, session: AsyncSession):
-    new_race = Race(
-        name=name,
-        race=race,
-        about=about,
-        time=time.replace(tzinfo=None)+timedelta(hours=3),
-        maxuser=maxuser,
-        status=status,
-        created_by=created_by,
-        scores_awarded=False
-    )
+    new_race = Race(name=name, race=race, about=about, time=time.replace(tzinfo=None)+timedelta(hours=3), maxuser=maxuser, status=status, created_by=created_by, scores_awarded=False)
     session.add(new_race)
     await session.commit()
     await session.refresh(new_race)
     return new_race
 
 async def get_all_users(id: int, session: AsyncSession):
-    result = await session.execute(
-        select(RaceResult)
-        .where(RaceResult.race_id == id)
-        .options(selectinload(RaceResult.user))
-    )
+    result = await session.execute(select(RaceResult).where(RaceResult.race_id == id).options(selectinload(RaceResult.user)))
     return result.scalars().all()
 
 async def get_results(id: int, session: AsyncSession):
-    result = await session.execute(
-        select(RaceResult)
-        .where(RaceResult.race_id == id)
-        .where(RaceResult.position.isnot(None))
-        .options(selectinload(RaceResult.user))
-        .order_by(RaceResult.position)
-    )
+    result = await session.execute(select(RaceResult).where(RaceResult.race_id == id).where(RaceResult.position.isnot(None)).options(selectinload(RaceResult.user)).order_by(RaceResult.position))
     return result.scalars().all()
 
 async def register_user(id: int, user_id: int, session: AsyncSession):
@@ -76,19 +53,13 @@ async def register_user(id: int, user_id: int, session: AsyncSession):
     if race.users >= race.maxuser:
         raise BadRequestException()
 
-    existing = await session.execute(
-        select(RaceResult)
-        .where(RaceResult.race_id == id)
-        .where(RaceResult.user_id == user_id)
-    )
+    existing = await session.execute(select(RaceResult).where(RaceResult.race_id == id).where(RaceResult.user_id == user_id))
     if existing.scalar_one_or_none():
         raise BadRequestException()
 
     race_result = RaceResult(race_id=id, user_id=user_id)
     session.add(race_result)
-    await session.execute(
-        update(Race).where(Race.id == id).values(users=Race.users + 1)
-    )
+    await session.execute(update(Race).where(Race.id == id).values(users=Race.users + 1))
     await session.commit()
     return race_result
 
@@ -101,14 +72,11 @@ async def unregister_user(id: int, user_id: int, session: AsyncSession):
     result = await session.execute(
         select(RaceResult)
         .where(RaceResult.race_id == id)
-        .where(RaceResult.user_id == user_id)
-    )
+        .where(RaceResult.user_id == user_id))
     race_result = result.scalar_one_or_none()
     if race_result is None:
         raise BadRequestException()
-    await session.execute(
-        update(Race).where(Race.id == id).values(users=Race.users - 1)
-    )
+    await session.execute(update(Race).where(Race.id == id).values(users=Race.users - 1))
     await session.delete(race_result)
     await session.commit()
 
@@ -134,28 +102,18 @@ async def set_results(race_id: int, results: list, session: AsyncSession):
             if rr.position is not None:
                 old_pts = points_for_position(rr.position)
                 if old_pts > 0:
-                    await session.execute(
-                        update(User)
-                        .where(User.id == user_id)
-                        .values(score=User.score - old_pts)
-                    )
+                    await session.execute(update(User).where(User.id == user_id).values(score=User.score - old_pts))
 
-    # Обновляем позиции
     for item in results:
         race_result = existing_map.get(item.user_id)
         if race_result is None:
             raise BadRequestException(detail=f"Пользователь {item.user_id} не зарегистрирован в этой гонке")
         race_result.position = item.position
 
-    # Начисляем новые очки всем участникам
     for item in results:
         pts = points_for_position(item.position)
         if pts > 0:
-            await session.execute(
-                update(User)
-                .where(User.id == item.user_id)
-                .values(score=User.score + pts)
-            )
+            await session.execute(update(User).where(User.id == item.user_id).values(score=User.score + pts))
 
     race.scores_awarded = True
     await session.commit()
@@ -174,17 +132,9 @@ async def update_race(race_id: int, data: dict, session: AsyncSession):
     await session.refresh(race)
     return race
 
-async def get_organizer_rating(
-    organizer_id: int,
-    session: AsyncSession
-) -> dict[str, int]:
+async def get_organizer_rating(organizer_id: int,session: AsyncSession) -> dict[str, int]:
     stmt = (
-        select(
-            func.sum(case((OrganizerReview.vote == 1, 1), else_=0)).label("likes"),
-            func.sum(case((OrganizerReview.vote == -1, 1), else_=0)).label("dislikes"),
-        )
-        .where(OrganizerReview.organizer_id == organizer_id)
-    )
+        select(func.sum(case((OrganizerReview.vote == 1, 1), else_=0)).label("likes"),func.sum(case((OrganizerReview.vote == -1, 1), else_=0)).label("dislikes"),).where(OrganizerReview.organizer_id == organizer_id))
     result = await session.execute(stmt)
     row = result.one_or_none()
     if row:
@@ -192,28 +142,14 @@ async def get_organizer_rating(
     return {"likes": 0, "dislikes": 0}
 
 
-async def get_organizer_ratings_bulk(
-    organizer_ids: list[int],
-    session: AsyncSession
-) -> dict[int, dict[str, int]]:
+async def get_organizer_ratings_bulk(organizer_ids: list[int], session: AsyncSession) -> dict[int, dict[str, int]]:
     if not organizer_ids:
         return {}
-    stmt = (
-        select(
-            OrganizerReview.organizer_id,
-            func.sum(case((OrganizerReview.vote == 1, 1), else_=0)).label("likes"),
-            func.sum(case((OrganizerReview.vote == -1, 1), else_=0)).label("dislikes"),
-        )
-        .where(OrganizerReview.organizer_id.in_(organizer_ids))
-        .group_by(OrganizerReview.organizer_id)
-    )
+    stmt = (select(OrganizerReview.organizer_id, func.sum(case((OrganizerReview.vote == 1, 1), else_=0)).label("likes"),func.sum(case((OrganizerReview.vote == -1, 1), else_=0)).label("dislikes"),).where(OrganizerReview.organizer_id.in_(organizer_ids)).group_by(OrganizerReview.organizer_id))
     result = await session.execute(stmt)
     ratings = {}
     for row in result:
-        ratings[row.organizer_id] = {
-            "likes": row.likes or 0,
-            "dislikes": row.dislikes or 0
-        }
+        ratings[row.organizer_id] = {"likes": row.likes or 0, "dislikes": row.dislikes or 0}
     for oid in organizer_ids:
         if oid not in ratings:
             ratings[oid] = {"likes": 0, "dislikes": 0}
@@ -229,30 +165,17 @@ async def submit_review(race_id: int, voter_id: int, vote: int, session: AsyncSe
     if race.created_by == voter_id:
         raise BadRequestException()
 
-    participant = await session.execute(
-        select(RaceResult)
-        .where(RaceResult.race_id == race_id)
-        .where(RaceResult.user_id == voter_id)
-    )
+    participant = await session.execute(select(RaceResult).where(RaceResult.race_id == race_id).where(RaceResult.user_id == voter_id))
     if participant.scalar_one_or_none() is None:
         raise ForbiddenException()
 
-    existing = await session.execute(
-        select(OrganizerReview)
-        .where(OrganizerReview.race_id == race_id)
-        .where(OrganizerReview.voter_id == voter_id)
-    )
+    existing = await session.execute(select(OrganizerReview).where(OrganizerReview.race_id == race_id).where(OrganizerReview.voter_id == voter_id))
     review = existing.scalar_one_or_none()
 
     if review:
         review.vote = vote
     else:
-        review = OrganizerReview(
-            race_id=race_id,
-            voter_id=voter_id,
-            organizer_id=race.created_by,
-            vote=vote,
-        )
+        review = OrganizerReview(race_id=race_id, voter_id=voter_id, organizer_id=race.created_by, vote=vote,)
         session.add(review)
 
     await session.commit()
@@ -261,11 +184,7 @@ async def submit_review(race_id: int, voter_id: int, vote: int, session: AsyncSe
 
 
 async def delete_review(race_id: int, voter_id: int, session: AsyncSession):
-    existing = await session.execute(
-        select(OrganizerReview)
-        .where(OrganizerReview.race_id == race_id)
-        .where(OrganizerReview.voter_id == voter_id)
-    )
+    existing = await session.execute(select(OrganizerReview).where(OrganizerReview.race_id == race_id).where(OrganizerReview.voter_id == voter_id))
     review = existing.scalar_one_or_none()
     if review is None:
         raise NotFoundException()

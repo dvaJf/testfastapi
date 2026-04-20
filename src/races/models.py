@@ -12,8 +12,8 @@ class Race(Base):
     users = Column(Integer, default=0)
     status = Column(String)
     about = Column(String)
-    created_by = Column(Integer, ForeignKey("user.id"), nullable=False)
-    scores_awarded = Column(Boolean, default=False, nullable=False)
+    created_by = Column(Integer, ForeignKey("user.id"))
+    scores_awarded = Column(Boolean, default=False)
     creator = relationship("User", back_populates="created_races")
     results = relationship("RaceResult", back_populates="race")
     reviews = relationship("OrganizerReview", back_populates="race")
@@ -22,8 +22,8 @@ class Race(Base):
 class RaceResult(Base):
     __tablename__ = "raceresult"
     id = Column(Integer, primary_key=True, autoincrement=True)
-    race_id = Column(Integer, ForeignKey("races.id"), nullable=False)
-    user_id = Column(Integer, ForeignKey("user.id"), nullable=False)
+    race_id = Column(Integer, ForeignKey("races.id"))
+    user_id = Column(Integer, ForeignKey("user.id"))
     position = Column(Integer, nullable=True)
     race = relationship("Race", back_populates="results")
     user = relationship("User", back_populates="race_results")
@@ -32,10 +32,10 @@ class RaceResult(Base):
 class OrganizerReview(Base):
     __tablename__ = "organizer_reviews"
     id = Column(Integer, primary_key=True, autoincrement=True)
-    race_id = Column(Integer, ForeignKey("races.id"), nullable=False)
-    voter_id = Column(Integer, ForeignKey("user.id"), nullable=False)
-    organizer_id = Column(Integer, ForeignKey("user.id"), nullable=False)
-    vote = Column(Integer, nullable=False)
+    race_id = Column(Integer, ForeignKey("races.id"))
+    voter_id = Column(Integer, ForeignKey("user.id"))
+    organizer_id = Column(Integer, ForeignKey("user.id"))
+    vote = Column(Integer)
     __table_args__ = (UniqueConstraint("race_id", "voter_id", name="uq_review_race_voter"),)
     race = relationship("Race", back_populates="reviews")
     voter = relationship("User", foreign_keys=[voter_id], back_populates="given_reviews")
