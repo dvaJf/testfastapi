@@ -39,7 +39,7 @@ async def create_race(race_data: RaceCreate, user: User = Depends(current_user),
 
 
 @router.get("/{race_id}", response_model=RaceOut)
-async def get_race(race_id, session: AsyncSession = Depends(get_session)):
+async def get_race(race_id: int, session: AsyncSession = Depends(get_session)):
     race = await service.get_race_with_creator(race_id, session)
     rating = await service.get_organizer_rating(race.created_by, session)
     return RaceOut.model_validate({**race.__dict__, "creator_email": race.creator.email if race.creator else None, "organizer_likes": rating["likes"], "organizer_dislikes": rating["dislikes"]})
