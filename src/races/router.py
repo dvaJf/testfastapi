@@ -46,7 +46,7 @@ async def get_race(race_id: int, session: AsyncSession = Depends(get_session)):
 
 
 @router.get("/{race_id}/all_users")
-async def get_participants(race_id, session: AsyncSession = Depends(get_session)):
+async def get_participants(race_id: int, session: AsyncSession = Depends(get_session)):
     await service.get_race(race_id, session)
     participants = await service.get_all_users(race_id, session)
     return [{"user_id": p.user_id, "username": p.user.email} for p in participants]
@@ -64,13 +64,13 @@ async def get_results(race_id: int, session: AsyncSession = Depends(get_session)
 
 
 @router.post("/{race_id}/register")
-async def register(race_id, user: User = Depends(current_user), session: AsyncSession = Depends(get_session),):
+async def register(race_id: int, user: User = Depends(current_user), session: AsyncSession = Depends(get_session),):
     await service.register_user(race_id, user.id, session)
     return {"message": "registered"}
 
 
 @router.delete("/{race_id}/unregister")
-async def unregister(race_id, user: User = Depends(current_user), session: AsyncSession = Depends(get_session)):
+async def unregister(race_id: int, user: User = Depends(current_user), session: AsyncSession = Depends(get_session)):
     await service.unregister_user(race_id, user.id, session)
 
 
