@@ -2,7 +2,7 @@
 // CONFIGURATION
 // ==========================================
 const CONFIG = {
-  API_URL: "http://localhost:8000/api",
+  API_URL: "https://f1u.vercel.app/api",
   TOKEN_KEY: "f1_access_token",
 };
 
