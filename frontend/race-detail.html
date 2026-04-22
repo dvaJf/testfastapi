@@ -198,7 +198,10 @@
       background: var(--surface2, rgba(255,255,255,.04));
       font-size: 13px;
       color: var(--text2);
+      text-decoration: none;
+      transition: background .15s;
     }
+    .part-row:hover { background: rgba(255,255,255,.07); }
     .part-av {
       width: 28px;
       height: 28px;
@@ -211,7 +214,26 @@
       font-size: 10px;
       font-weight: 700;
       flex-shrink: 0;
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,.1);
     }
+    .part-av img { width: 100%; height: 100%; object-fit: cover; }
+    .podium-av {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: rgba(255,255,255,.08);
+      color: var(--text3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 9px;
+      font-weight: 700;
+      flex-shrink: 0;
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,.1);
+    }
+    .podium-av img { width: 100%; height: 100%; object-fit: cover; }
 
     /* actions */
     .rd-actions {
@@ -421,6 +443,7 @@ const raceId = parseInt(window.location.pathname.split('/')[2]);
 let race = null;
 let raceParticipants = [];
 let isRegistered = false;
+let profilesMap = {}; // user_id → {avatar_url, nickname, ...}
 
 async function init() {
   renderHeader('home');
@@ -436,6 +459,18 @@ async function loadRace() {
     race = await api.getRace(raceId);
     raceParticipants = await api.getRaceParticipants(raceId);
     isRegistered = currentUser && raceParticipants.some(p => p.user_id === currentUser.id);
+
+    // загружаем профили всех участников параллельно для аватарок
+    const profileResults = await Promise.allSettled(
+      raceParticipants.map(p => api.getPublicProfile(p.user_id))
+    );
+    profilesMap = {};
+    raceParticipants.forEach((p, i) => {
+      if (profileResults[i].status === 'fulfilled') {
+        profilesMap[p.user_id] = profileResults[i].value;
+      }
+    });
+
     document.title = `${race.name} — F1 Online`;
     await renderRace();
   } catch (e) {
@@ -487,10 +522,15 @@ async function renderRace() {
   const participantsHtml = raceParticipants.length
     ? raceParticipants.map(p => {
         const initials = p.username.split('@')[0].slice(0, 2).toUpperCase();
-        return `<div class="part-row">
-          <div class="part-av">${initials}</div>
-          <span>${p.username}</span>
-        </div>`;
+        const profile = profilesMap[p.user_id];
+        const avHtml = profile?.avatar_url
+          ? `<div class="part-av"><img src="${profile.avatar_url}" alt="${initials}" onerror="this.parentElement.textContent='${initials}'"/></div>`
+          : `<div class="part-av">${initials}</div>`;
+        const displayName = profile?.nickname || p.username.split('@')[0];
+        return `<a href="/profile?id=${p.user_id}" class="part-row">
+          ${avHtml}
+          <span>${displayName}</span>
+        </a>`;
       }).join('')
     : '<div style="color:var(--text3);font-size:13px;padding:8px 0;">Нет участников</div>';
 
@@ -540,12 +580,27 @@ async function renderRace() {
     try {
       const results = await api.getRaceResults(raceId);
       if (results.results && results.results.length > 0) {
+        // догружаем профили тех, кого нет в participantsMap (исторические результаты)
+        const missing = results.results.filter(r => !profilesMap[r.user_id]).map(r => r.user_id);
+        if (missing.length) {
+          const extra = await Promise.allSettled(missing.map(id => api.getPublicProfile(id)));
+          missing.forEach((id, i) => {
+            if (extra[i].status === 'fulfilled') profilesMap[id] = extra[i].value;
+          });
+        }
         const rows = results.results.map(r => {
           const posClass = r.position <= 3 ? `p${r.position}` : 'other';
           const pts = POINTS_TABLE[r.position] || 0;
+          const profile = profilesMap[r.user_id];
+          const initials = r.username.split('@')[0].slice(0, 2).toUpperCase();
+          const avHtml = profile?.avatar_url
+            ? `<div class="podium-av"><img src="${profile.avatar_url}" alt="${initials}" onerror="this.parentElement.textContent='${initials}'"/></div>`
+            : `<div class="podium-av">${initials}</div>`;
+          const displayName = profile?.nickname || r.username.split('@')[0];
           return `<div class="podium-row ${r.position <= 3 ? `p${r.position}` : ''}">
             <div class="podium-pos ${posClass}">${r.position}</div>
-            <div class="podium-name">${r.username.split('@')[0]}</div>
+            ${avHtml}
+            <div class="podium-name">${displayName}</div>
             <div class="podium-pts ${pts === 0 ? 'zero' : ''}">${pts > 0 ? `+${pts}` : '—'}</div>
           </div>`;
         }).join('');
