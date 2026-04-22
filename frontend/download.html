@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Скачать — F1 Online</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="/static/css/main.css"/>
+  <style>
+    .guide-wrap {
+      max-width: 780px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+    .guide-hero {
+      margin-bottom: 3rem;
+    }
+    .guide-hero h1 {
+      font-family: var(--font-display);
+      font-size: clamp(40px, 7vw, 72px);
+      letter-spacing: 2px;
+      line-height: 1;
+      margin-bottom: .75rem;
+    }
+    .guide-hero p {
+      color: var(--text2);
+      font-size: 15px;
+    }
+
+    /* step */
+    .step {
+      display: flex;
+      gap: 1.25rem;
+      margin-bottom: 2.5rem;
+      align-items: flex-start;
+    }
+    .step-num {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: var(--red);
+      color: #fff;
+      font-family: var(--font-display);
+      font-size: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+    .step-body { flex: 1; min-width: 0; }
+    .step-title {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: .4rem;
+      line-height: 1.4;
+    }
+    .step-desc {
+      font-size: 14px;
+      color: var(--text2);
+      line-height: 1.7;
+      margin-bottom: .75rem;
+    }
+    .step-img {
+      width: 100%;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      margin-top: .75rem;
+      cursor: zoom-in;
+      transition: opacity .2s;
+    }
+    .step-img:hover { opacity: .85; }
+
+    /* info box */
+    .info-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1rem 1.25rem;
+      font-size: 14px;
+      color: var(--text2);
+      margin-bottom: .75rem;
+      line-height: 1.7;
+    }
+    .info-box.red { border-left: 3px solid var(--red); }
+    .info-box.yellow { border-left: 3px solid #ffc107; }
+    .info-box.green { border-left: 3px solid var(--green); }
+
+    .mono {
+      font-family: monospace;
+      background: rgba(255,255,255,.08);
+      border-radius: 4px;
+      padding: 2px 7px;
+      font-size: 13px;
+      color: #fff;
+    }
+
+    /* download button */
+    .dl-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--red);
+      color: #fff;
+      font-weight: 600;
+      font-size: 15px;
+      padding: 12px 24px;
+      border-radius: 8px;
+      text-decoration: none;
+      border: none;
+      cursor: pointer;
+      transition: opacity .2s, transform .15s;
+      margin-bottom: .5rem;
+    }
+    .dl-btn:hover { opacity: .88; transform: translateY(-1px); }
+
+    /* divider */
+    .guide-divider {
+      height: 1px;
+      background: var(--border);
+      margin: 2rem 0;
+    }
+
+    /* lightbox */
+    .lightbox {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.9);
+      z-index: 9999;
+      align-items: center;
+      justify-content: center;
+      cursor: zoom-out;
+    }
+    .lightbox.open { display: flex; }
+    .lightbox img {
+      max-width: 92vw;
+      max-height: 92vh;
+      border-radius: 10px;
+      object-fit: contain;
+    }
+  </style>
+</head>
+<body>
+<div class="loading-overlay" id="loading-overlay"><div class="spinner"></div></div>
+<header class="site-header" id="site-header"></header>
+
+<!-- Lightbox -->
+<div class="lightbox" id="lightbox" onclick="closeLightbox()">
+  <img id="lightbox-img" src="" alt=""/>
+</div>
+
+<main>
+  <div class="guide-wrap">
+    <div class="guide-hero">
+      <h1>Установка<br/><span style="color:var(--red);">F1 2022</span></h1>
+      <p>Пошаговая инструкция по установке игры и подключению к сети F1 Online.</p>
+    </div>
+
+    <!-- Шаг 1 -->
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-body">
+        <div class="step-title">Скачайте игру</div>
+        <div class="step-desc">Скачайте торрент-файл F1 22 [FitGL Repack] и установите игру в любую папку.</div>
+        <a class="dl-btn" href="https://drive.google.com/file/d/12QD3hZkhyP7arWIF8iRw_eNjkfLIe7Kj/view?usp=drive_link" target="_blank" rel="noopener">
+          ⬇ Скачать торрент
+        </a>
+      </div>
+    </div>
+
+    <div class="guide-divider"></div>
+
+    <!-- Шаг 2 -->
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-body">
+        <div class="step-title">Установите Radmin VPN</div>
+        <div class="step-desc">
+          Скачайте и установите <a href="https://www.radmin-vpn.com/ru/" target="_blank" rel="noopener" style="color:var(--red);">Radmin VPN</a> — бесплатная программа для создания виртуальной локальной сети.
+        </div>
+        <div>
+          После установки присоединитесь к сети:<br/>
+          Имя сети: <span class="mono">Formula_one_2022</span><br/>
+          Пароль: <span class="mono">25252525</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="guide-divider"></div>
+
+    <!-- Шаг 3 -->
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-body">
+        <div class="step-title">Настройте SteamConfig.ini</div>
+        <div class="step-desc">
+          Найдите файл <span class="mono">SteamConfig.ini</span> в папке с игрой (см. скриншот).
+          Откройте его в блокноте и измените значение <span class="mono">SteamUserID</span> на любое случайное число того же количества цифр.
+        </div>
+        <div >
+           Не используйте одинаковый SteamUserID с другими игроками — это вызовет конфликт в сети.
+        </div>
+        <img class="step-img" src="https://cdn.discordapp.com/attachments/1494057559005331677/1494057778124427274/image.png?ex=69ea73bc&is=69e9223c&hm=1c0e85e180b3a605b49a18687dd96dffd86cf3a35d9c019b892e30245403c425&"
+        alt="Папка с игрой" onclick="openLightbox(this.src)"/>
+        <img class="step-img" src="https://cdn.discordapp.com/attachments/1494057559005331677/1494057886718890174/image.png?ex=69ea73d6&is=69e92256&hm=d059541f1e98c2f24a2c11ae3ca63fdf2ee596d8cef3f42253a1652c2e348d89&"
+             alt="Папка с игрой" onclick="openLightbox(this.src)"/>
+        
+      </div>
+    </div>
+
+    <div class="guide-divider"></div>
+
+    <!-- Шаг 4 -->
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-body">
+        <div class="step-title">Смените язык (опционально)</div>
+        <div class="step-desc">
+          В том же файле <span class="mono">SteamConfig.ini</span> найдите строку <span class="mono">Language</span> и измените значение с <span class="mono">english</span> на <span class="mono">russian</span>.
+        </div>
+        <img class="step-img" src="https://cdn.discordapp.com/attachments/1494057559005331677/1494057972744065126/image.png?ex=69ea73ea&is=69e9226a&hm=6e35d05aa8e7fae56ab0de3f2adebb0c16731806f0b1e08ef5b20fe716a87cce&"
+             alt="SteamConfig.ini" onclick="openLightbox(this.src)"/>
+        
+      </div>
+    </div>
+
+    <div class="guide-divider"></div>
+
+    <!-- Шаг 5 -->
+    <div class="step">
+      <div class="step-num">5</div>
+      <div class="step-body">
+        <div class="step-title">Windows 11 — удалите DLL</div>
+        <div class="step-desc">
+          Если у вас Windows 11 и игра не запускается — удалите файл <span class="mono">nvngx_dlss.dll</span> из папки с игрой.
+        </div>
+        <img class="step-img" src="https://cdn.discordapp.com/attachments/1494057559005331677/1494058048866488370/image.png?ex=69ea73fd&is=69e9227d&hm=38e867057d8894f715498f57413476d54de4a98f36ba58aa56241c8eb3c72898&"
+             alt="Смена языка" onclick="openLightbox(this.src)"/>
+
+      </div>
+    </div>
+
+    <div class="guide-divider"></div>
+
+    <!-- Шаг 6 -->
+    <div class="step">
+      <div class="step-num">6</div>
+      <div class="step-body">
+        <div class="step-title">Играть!</div>
+        <div class="step-desc">
+          Запустите игру. Перед гонкой убедитесь что вы подключены к сети <span class="mono">Formula_one_2022</span> в Radmin VPN.
+        </div>
+        <div >
+           Всё готово! Регистрируйтесь на гонки на главной странице и соревнуйтесь с другими пилотами.
+        </div>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<script src="/static/js/shared.js"></script>
+<script>
+function openLightbox(src) {
+  document.getElementById("lightbox-img").src = src;
+  document.getElementById("lightbox").classList.add("open");
+  document.body.style.overflow = "hidden";
+}
+function closeLightbox() {
+  document.getElementById("lightbox").classList.remove("open");
+  document.body.style.overflow = "";
+}
+document.addEventListener("keydown", e => { if (e.key === "Escape") closeLightbox(); });
+
+async function init() {
+  renderHeader('download');
+  injectAuthModal();
+  injectToast();
+  await initAuth();
+  document.getElementById("loading-overlay").classList.add("hidden");
+}
+init();
+</script>
+</body>
+</html>

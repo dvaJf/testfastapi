@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Рейтинг пилотов — F1 Online</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="/static/css/main.css"/>
+</head>
+<body>
+<div class="loading-overlay" id="loading-overlay"><div class="spinner"></div></div>
+<header class="site-header" id="site-header"></header>
+
+<main>
+  <section class="hero">
+    <h1>Рейтинг<br/><span>Пилотов</span></h1>
+    <p class="hero-sub">Таблица лидеров F1 Online по очкам за завершённые гонки</p>
+  </section>
+
+  <section class="races-section">
+    <div class="section-header">
+      <span class="section-title">Таблица лидеров</span>
+      <span class="section-count" id="leaderboard-count">Загрузка...</span>
+    </div>
+    <div style="overflow-x:auto;">
+      <table class="admin-table" id="leaderboard-table">
+        <thead>
+          <tr>
+            <th style="width:70px;">Место</th>
+            <th>Пилот</th>
+            <th style="width:100px;">Гонок</th>
+            <th style="width:130px;">Лучший рез.</th>
+            <th style="width:110px;">Очки</th>
+          </tr>
+        </thead>
+        <tbody id="leaderboard-tbody">
+          <tr><td colspan="5" style="text-align:center;color:var(--text3);padding:3rem;">Загрузка...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+</main>
+
+<script src="/static/js/shared.js"></script>
+<script>
+async function init() {
+  renderHeader('rating');
+  injectAuthModal();
+  injectToast();
+  await initAuth();
+  await loadLeaderboard();
+  document.getElementById("loading-overlay").classList.add("hidden");
+}
+
+async function loadLeaderboard() {
+  try {
+    const users = await api.getLeaderboard();
+    document.getElementById("leaderboard-count").textContent = `${users.length} ${pluralize(users.length, "пилот", "пилота", "пилотов")}`;
+    const tbody = document.getElementById("leaderboard-tbody");
+    if (!users.length) { tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:3rem;">Нет данных</td></tr>'; return; }
+
+    tbody.innerHTML = users.map((user, index) => {
+      const rank = index + 1;
+      let rankStyle = "", rowStyle = "";
+      if (rank === 1) { rankStyle = "background:rgba(255,193,7,.2);color:#ffc107;font-weight:700;"; rowStyle = "background:rgba(255,193,7,.04);"; }
+      else if (rank === 2) { rankStyle = "background:rgba(176,196,222,.2);color:#b0c4de;font-weight:700;"; rowStyle = "background:rgba(176,196,222,.03);"; }
+      else if (rank === 3) { rankStyle = "background:rgba(205,127,50,.2);color:#cd7f32;font-weight:700;"; rowStyle = "background:rgba(205,127,50,.03);"; }
+
+      const bp = user.best_position;
+      const bestHtml = bp
+        ? `<span class="pos-badge ${bp <= 3 ? `pos-${bp}` : 'pos-other'}">${bp}</span>`
+        : '<span style="color:var(--text3);">—</span>';
+
+     return `
+        <tr style="${rowStyle}cursor:pointer;" onclick="window.location.href='/profile?id=${user.user_id}'">
+          <td>
+            <span style="display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:50%;${rankStyle}">${rank}</span>
+          </td>
+          <td>
+  <div style="display:flex;align-items:center;gap:10px;">
+    <div style="width:36px;height:36px;border-radius:50%;overflow:hidden;flex-shrink:0;background:var(--red);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;">
+      ${user.avatar_url
+        ? `<img src="${user.avatar_url}" style="width:100%;height:100%;object-fit:cover;" onerror="this.parentElement.innerHTML='${user.email.slice(0,2).toUpperCase()}'">`
+        : user.email.slice(0, 2).toUpperCase()
+      }
+    </div>
+    <span style="font-weight:500;">${user.email}</span>
+  </div>
+</td>
+          <td style="color:var(--text2);">${user.races_completed || 0}</td>
+          <td>${bestHtml}</td>
+          <td><span class="hero-stat-val" style="font-size:22px;">${user.score || 0}</span></td>
+        </tr>`;
+    }).join('');
+  } catch (e) {
+    document.getElementById("leaderboard-tbody").innerHTML = `<tr><td colspan="5" style="text-align:center;color:var(--red);padding:3rem;">${e.message}</td></tr>`;
+  }
+}
+
+init();
+</script>
+</body>
+</html>

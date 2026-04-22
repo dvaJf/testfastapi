@@ -8,3 +8,4 @@ class LeaderboardEntry(BaseModel):
     score: int
     races_completed: Optional[int] = 0
     best_position: Optional[int] = None
+    avatar_url: Optional[str] = None

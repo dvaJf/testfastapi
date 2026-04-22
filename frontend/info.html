@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Информация — F1 Online</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="/static/css/main.css"/>
+</head>
+<body>
+<div class="loading-overlay" id="loading-overlay"><div class="spinner"></div></div>
+<header class="site-header" id="site-header"></header>
+
+<main>
+  <div class="placeholder-page">
+    <h1>Информация</h1>
+    <p>О проекте F1 Online, правилах участия и организации гонок.</p>
+
+    <div style="margin-top:3rem;display:flex;flex-direction:column;gap:2rem;max-width:700px;">
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:2rem;border-left:4px solid var(--red);">
+        <h3 style="font-family:var(--font-display);font-size:26px;margin-bottom:1rem;">О проекте</h3>
+        <p style="color:var(--text2);line-height:1.8;">F1 Online — это платформа для проведения онлайн-гонок в Formula 1. Регистрируйтесь на гонки, соревнуйтесь с другими пилотами и следите за своим рейтингом.</p>
+      </div>
+      
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:2rem;border-left:4px solid var(--green);">
+        <h3 style="font-family:var(--font-display);font-size:26px;margin-bottom:1rem;">Правила</h3>
+        <ul style="color:var(--text2);line-height:2;padding-left:1.5rem;">
+          <li>Уважайте других участников</li>
+          <li>Не используйте читы и запрещённые программы</li>
+          <li>Регистрируйтесь только на те гонки, в которых планируете участвовать</li>
+          <li>Организаторы могут быть оценены участниками после гонки</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script src="/static/js/shared.js"></script>
+<script>
+async function init() {
+  renderHeader('info');
+  injectAuthModal();
+  injectToast();
+  await initAuth();
+  document.getElementById("loading-overlay").classList.add("hidden");
+}
+init();
+</script>
+</body>
+</html>

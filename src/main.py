@@ -2,6 +2,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 
 from src.auth.router import router as auth_router
 from src.races.router import router as races_router
@@ -31,11 +32,57 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(leaderboard_router, prefix="/auth/users", tags=["leaderboard"])
-app.include_router(auth_router, prefix="/auth")
-app.include_router(races_router, prefix="/races", tags=["races"])
-app.include_router(news_router, prefix="/news", tags=["news"])
+# API routers
+
+
+# Static files (CSS, JS assets)
+app.mount("/static", StaticFiles(directory="frontend"), name="static")
+
+
+# ==========================================
+# PAGE ROUTES
+# ==========================================
 
 @app.get("/")
 async def serve_index():
-    return FileResponse("index.html")
+    return FileResponse("frontend/index.html")
+
+
+@app.get("/news")
+async def serve_news():
+    return FileResponse("frontend/news.html")
+
+
+@app.get("/news/{news_id:int}")
+async def serve_news_detail(news_id: int):
+    return FileResponse("frontend/news-detail.html")
+
+
+@app.get("/races/{race_id:int}")
+async def serve_race_detail(race_id: int):
+    return FileResponse("frontend/race-detail.html")
+
+
+@app.get("/download")
+async def serve_download():
+    return FileResponse("frontend/download.html")
+
+
+@app.get("/rating")
+async def serve_rating():
+    return FileResponse("frontend/rating.html")
+
+
+@app.get("/info")
+async def serve_info():
+    return FileResponse("frontend/info.html")
+
+
+@app.get("/profile")
+async def serve_profile():
+    return FileResponse("frontend/profile.html")
+
+app.include_router(leaderboard_router, prefix="/api/auth/users", tags=["leaderboard"])
+app.include_router(auth_router,        prefix="/api/auth")
+app.include_router(races_router,       prefix="/api/races",      tags=["races"])
+app.include_router(news_router,        prefix="/api/news",       tags=["news"])
