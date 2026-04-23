@@ -13,4 +13,4 @@ class User(SQLAlchemyBaseUserTable[int], Base):
     race_results = relationship("RaceResult", back_populates="user")
     created_races = relationship("Race", back_populates="creator")
     given_reviews = relationship("OrganizerReview", foreign_keys="OrganizerReview.voter_id",back_populates="voter")
-    received_reviews = relationship("OrganizerReview", foreign_keys="OrganizerReview.organizer_id", back_populates="organizer")
+    received_reviews = relationship("OrganizerReview", foreign_keys="OrganizerReview.organizer_id", back_populates="organizer") 
