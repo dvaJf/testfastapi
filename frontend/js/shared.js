@@ -270,7 +270,7 @@ async function handleEditProfile(e) {
     closeModal("modal-edit-profile");
     showToast("Профиль обновлён!");
     
-    // Перезагружаем профиль если есть функция
+    // Перезагружаем прфиль если есть функция
     if (typeof loadProfile === "function") await loadProfile();
     else window.location.reload();
   } catch(e) {
