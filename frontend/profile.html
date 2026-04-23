@@ -1,197 +1,275 @@
 <!DOCTYPE html>
 <html lang="ru">
-<head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Профиль — F1 Online</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com"/>
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet"/>
-  <link rel="stylesheet" href="/static/css/main.css"/>
-  <style>
-    .profile-hero {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 2rem;
-      display: flex;
-      gap: 2rem;
-      align-items: flex-start;
-      margin-bottom: 1.5rem;
-      position: relative;
-    }
-    .profile-ava {
-      width: 96px;
-      height: 96px;
-      border-radius: 50%;
-      object-fit: cover;
-      background: var(--red);
-      color: #fff;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-family: var(--font-display);
-      font-size: 36px;
-      flex-shrink: 0;
-      border: 3px solid var(--border);
-      overflow: hidden;
-    }
-    .profile-ava img { width: 100%; height: 100%; object-fit: cover; }
-    .profile-main { flex: 1; min-width: 0; }
-    .profile-nickname {
-      font-family: var(--font-display);
-      font-size: 32px;
-      letter-spacing: 1px;
-      line-height: 1;
-      margin-bottom: .25rem;
-      word-break: break-word;
-      overflow-wrap: break-word;
-    }
-    .profile-email { font-size: 13px; color: var(--text3); margin-bottom: .75rem; }
-    .profile-desc {
-      font-size: 14px;
-      color: var(--text2);
-      line-height: 1.7;
-      max-width: 540px;
-      white-space: pre-wrap;
-      word-break: break-word;
-      overflow-wrap: break-word;
-    }
-    .profile-desc.empty { color: var(--text3); font-style: italic; }
-    .profile-stats {
-      display: flex;
-      gap: 2rem;
-      margin-top: 1.25rem;
-      padding-top: 1.25rem;
-      border-top: 1px solid var(--border);
-      flex-wrap: wrap;
-    }
-    .pstat { display: flex; flex-direction: column; gap: 4px; }
-    .pstat-val { font-family: var(--font-display); font-size: 28px; line-height: 1; }
-    .pstat-label { font-size: 11px; color: var(--text3); text-transform: uppercase; letter-spacing: 1px; }
-    .profile-edit-btn {
-      position: absolute;
-      top: 1.25rem;
-      right: 1.25rem;
-    }
-    .back-link {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      color: var(--text3);
-      text-decoration: none;
-      font-size: 13px;
-      margin-bottom: 1.5rem;
-      transition: color .15s;
-    }
-    .back-link:hover { color: var(--text); }
-    @media(max-width:600px) {
-      .profile-hero { flex-direction: column; align-items: center; text-align: center; }
-      .profile-stats { justify-content: center; }
-      .profile-edit-btn { position: static; margin-top: 1rem; width: 100%; }
-    }
-  </style>
-</head>
-<body>
-<div class="loading-overlay" id="loading-overlay"><div class="spinner"></div></div>
-<header class="site-header" id="site-header"></header>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Профиль — F1 Online</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/static/css/main.css" />
+    <style>
+      .profile-hero {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 2rem;
+        display: flex;
+        gap: 2rem;
+        align-items: flex-start;
+        margin-bottom: 1.5rem;
+        position: relative;
+      }
+      .profile-ava {
+        width: 96px;
+        height: 96px;
+        border-radius: 50%;
+        object-fit: cover;
+        background: var(--red);
+        color: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: var(--font-display);
+        font-size: 36px;
+        flex-shrink: 0;
+        border: 3px solid var(--border);
+        overflow: hidden;
+      }
+      .profile-ava img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+      .profile-main {
+        flex: 1;
+        min-width: 0;
+      }
+      .profile-nickname {
+        font-family: var(--font-display);
+        font-size: 32px;
+        letter-spacing: 1px;
+        line-height: 1;
+        margin-bottom: 0.25rem;
+        word-break: break-word;
+        overflow-wrap: break-word;
+      }
+      .profile-email {
+        font-size: 13px;
+        color: var(--text3);
+        margin-bottom: 0.75rem;
+      }
+      .profile-desc {
+        font-size: 14px;
+        color: var(--text2);
+        line-height: 1.7;
+        max-width: 540px;
+        white-space: pre-wrap;
+        word-break: break-word;
+        overflow-wrap: break-word;
+      }
+      .profile-desc.empty {
+        color: var(--text3);
+        font-style: italic;
+      }
+      .profile-stats {
+        display: flex;
+        gap: 2rem;
+        margin-top: 1.25rem;
+        padding-top: 1.25rem;
+        border-top: 1px solid var(--border);
+        flex-wrap: wrap;
+      }
+      .pstat {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+      .pstat-val {
+        font-family: var(--font-display);
+        font-size: 28px;
+        line-height: 1;
+      }
+      .pstat-label {
+        font-size: 11px;
+        color: var(--text3);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+      }
+      .profile-edit-btn {
+        position: absolute;
+        top: 1.25rem;
+        right: 1.25rem;
+      }
+      .back-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        color: var(--text3);
+        text-decoration: none;
+        font-size: 13px;
+        margin-bottom: 1.5rem;
+        transition: color 0.15s;
+      }
+      .back-link:hover {
+        color: var(--text);
+      }
+      @media (max-width: 600px) {
+        .profile-hero {
+          flex-direction: column;
+          align-items: center;
+          text-align: center;
+        }
+        .profile-stats {
+          justify-content: center;
+        }
+        .profile-edit-btn {
+          position: static;
+          margin-top: 1rem;
+          width: 100%;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="loading-overlay" id="loading-overlay">
+      <div class="spinner"></div>
+    </div>
+    <header class="site-header" id="site-header"></header>
 
-<main>
-  <section class="profile-section" id="profile-content">
-    <div class="skeleton" style="height:160px;border-radius:12px;margin-bottom:2rem;"></div>
-    <div class="skeleton" style="height:300px;border-radius:12px;"></div>
-  </section>
-</main>
+    <main>
+      <section class="profile-section" id="profile-content">
+        <div
+          class="skeleton"
+          style="height: 160px; border-radius: 12px; margin-bottom: 2rem"
+        ></div>
+        <div class="skeleton" style="height: 300px; border-radius: 12px"></div>
+      </section>
+    </main>
 
-<script src="/static/js/shared.js"></script>
-<script>
-const viewedUserId = new URLSearchParams(window.location.search).get('id');
-const isOwnProfile = !viewedUserId;
+    <script src="/static/js/shared.js"></script>
+    <script>
+      const viewedUserId = new URLSearchParams(window.location.search).get(
+        "id"
+      );
+      const isOwnProfile = !viewedUserId;
 
-async function init() {
-  renderHeader('profile');
-  injectAuthModal();
-  injectToast();
-  await initAuth();
+      async function init() {
+        renderHeader("profile");
+        injectAuthModal();
+        injectToast();
+        await initAuth();
 
-  if (isOwnProfile && !currentUser) {
-    openAuthModal('login');
-    document.getElementById("profile-content").innerHTML = `
+        if (isOwnProfile && !currentUser) {
+          openAuthModal("login");
+          document.getElementById("profile-content").innerHTML = `
       <div class="empty-state">
         <div class="empty-state-icon">👤</div>
         <p>Войдите в аккаунт, чтобы просмотреть профиль</p>
         <button class="btn btn-red" style="margin-top:1.5rem;" onclick="openAuthModal('login')">Войти</button>
       </div>`;
-    document.getElementById("loading-overlay").classList.add("hidden");
-    return;
-  }
+          document.getElementById("loading-overlay").classList.add("hidden");
+          return;
+        }
 
-  await loadProfile();
-  document.getElementById("loading-overlay").classList.add("hidden");
-}
-
-async function loadProfile() {
-  try {
-    let profileUser, userRaces = [];
-
-    if (isOwnProfile) {
-      const stats = await api.getPublicProfile(currentUser.id);
-      profileUser = { ...currentUser, races_completed: stats.races_completed, best_position: stats.best_position };
-      const races = await api.getRaces();
-      const registrations = new Set();
-      for (const race of races) {
-        try {
-          const p = await api.getRaceParticipants(race.id);
-          if (p.some(x => x.user_id === currentUser.id)) registrations.add(race.id);
-        } catch(e) {}
+        await loadProfile();
+        document.getElementById("loading-overlay").classList.add("hidden");
       }
-      userRaces = races.filter(r => registrations.has(r.id));
-    } else {
-      profileUser = await api.getPublicProfile(parseInt(viewedUserId));
-    }
 
-    renderProfile(profileUser, userRaces);
-  } catch(e) { showToast(e.message, true); }
-}
+      async function loadProfile() {
+        try {
+          let profileUser,
+            userRaces = [];
 
-function renderProfile(u, userRaces = []) {
-  let statusText = "Пилот", statusStyle = "";
-  if (u.is_superuser) { statusText = "Администратор"; statusStyle = "background:rgba(225,6,0,.2);color:var(--red);"; }
-  else if (u.is_verified) { statusText = "Верифицированный пилот"; statusStyle = "background:rgba(0,200,83,.15);color:var(--green);"; }
+          if (isOwnProfile) {
+            const stats = await api.getPublicProfile(currentUser.id);
+            profileUser = {
+              ...currentUser,
+              races_completed: stats.races_completed,
+              best_position: stats.best_position,
+            };
+            const races = await api.getRaces();
+            const registrations = new Set();
+            for (const race of races) {
+              try {
+                const p = await api.getRaceParticipants(race.id);
+                if (p.some((x) => x.user_id === currentUser.id))
+                  registrations.add(race.id);
+              } catch (e) {}
+            }
+            userRaces = races.filter((r) => registrations.has(r.id));
+          } else {
+            profileUser = await api.getPublicProfile(parseInt(viewedUserId));
+          }
 
-  const displayName = u.nickname || (u.email ? u.email.replace('@discord.local', '') : 'Пилот');
-  const initials = displayName.slice(0, 2).toUpperCase();
+          renderProfile(profileUser, userRaces);
+        } catch (e) {
+          showToast(e.message, true);
+        }
+      }
 
-  const avatarHtml = u.avatar_url
-    ? `<div class="profile-ava"><img src="${u.avatar_url}" alt="avatar" onerror="this.parentElement.innerHTML='${initials}'"/></div>`
-    : `<div class="profile-ava">${initials}</div>`;
+      function renderProfile(u, userRaces = []) {
+        let statusText = "Пилот",
+          statusStyle = "";
+        if (u.is_superuser) {
+          statusText = "Администратор";
+          statusStyle = "background:rgba(225,6,0,.2);color:var(--red);";
+        } else if (u.is_verified) {
+          statusText = "Верифицированный пилот";
+          statusStyle = "background:rgba(0,200,83,.15);color:var(--green);";
+        }
 
-  const editBtn = isOwnProfile
-    ? `<button class="btn btn-ghost profile-edit-btn" onclick="openEditModal()">✎ Редактировать профиль</button>`
-    : '';
+        const displayName =
+          u.nickname ||
+          (u.email ? u.email.replace("@discord.local", "") : "Пилот");
+        const initials = displayName.slice(0, 2).toUpperCase();
 
-  const backBtn = !isOwnProfile
-    ? `<a href="/rating" class="back-link">← Рейтинг пилотов</a>` : '';
+        const avatarHtml = u.avatar_url
+          ? `<div class="profile-ava"><img src="${u.avatar_url}" alt="avatar" onerror="this.parentElement.innerHTML='${initials}'"/></div>`
+          : `<div class="profile-ava">${initials}</div>`;
 
-  const racesSection = isOwnProfile ? `
+        const editBtn = isOwnProfile
+          ? `<button class="btn btn-ghost profile-edit-btn" onclick="openEditModal()">✎ Редактировать профиль</button>`
+          : "";
+
+        const backBtn = !isOwnProfile
+          ? `<a href="/rating" class="back-link">← Рейтинг пилотов</a>`
+          : "";
+
+        const racesSection = isOwnProfile
+          ? `
     <div class="section-header" style="margin-top:1rem;">
       <span class="section-title">Мои регистрации</span>
     </div>
     <div class="races-grid">${
       userRaces.length
-        ? userRaces.map(race => `
-          <a href="/races/${race.id}" class="race-card" style="text-decoration:none;">
+        ? userRaces
+            .map(
+              (race) => `
+          <a href="/races/${
+            race.id
+          }" class="race-card" style="text-decoration:none;">
             <div class="race-card-top">
               <div class="race-type">${race.race}</div>
-              <span class="status-badge ${getStatusClass(race.status)}">${race.status}</span>
+              <span class="status-badge ${getStatusClass(race.status)}">${
+                race.status
+              }</span>
             </div>
             <h2>${race.name}</h2>
-            <div class="race-card-meta"><span>📅 ${formatDate(race.time)}</span></div>
-          </a>`).join('')
+            <div class="race-card-meta"><span>📅 ${formatDate(
+              race.time
+            )}</span></div>
+          </a>`
+            )
+            .join("")
         : '<div class="empty-state" style="grid-column:1/-1;">Нет активных регистраций</div>'
-    }</div>` : '';
+    }</div>`
+          : "";
 
-  document.getElementById("profile-content").innerHTML = `
+        document.getElementById("profile-content").innerHTML = `
     ${backBtn}
     <div class="profile-hero">
       ${avatarHtml}
@@ -199,8 +277,11 @@ function renderProfile(u, userRaces = []) {
         <div class="profile-nickname">${displayName}</div>
         <div class="profile-email">${u.email}</div>
         <div class="modal-meta-chip" style="${statusStyle};display:inline-flex;margin-bottom:.75rem;">${statusText}</div>
-        <div class="profile-desc ${u.description ? '' : 'empty'}">
-          ${u.description || (isOwnProfile ? 'Добавьте описание профиля...' : 'Нет описания')}
+        <div class="profile-desc ${u.description ? "" : "empty"}">
+          ${
+            u.description ||
+            (isOwnProfile ? "Добавьте описание профиля..." : "Нет описания")
+          }
         </div>
         <div class="profile-stats">
           <div class="pstat">
@@ -212,7 +293,9 @@ function renderProfile(u, userRaces = []) {
             <div class="pstat-label">Гонок</div>
           </div>
           <div class="pstat">
-            <div class="pstat-val">${u.best_position ? '#' + u.best_position : '—'}</div>
+            <div class="pstat-val">${
+              u.best_position ? "#" + u.best_position : "—"
+            }</div>
             <div class="pstat-label">Лучший рез.</div>
           </div>
         </div>
@@ -220,83 +303,135 @@ function renderProfile(u, userRaces = []) {
       ${editBtn}
     </div>
     ${racesSection}`;
-}
+      }
 
-function openEditModal() {
-  const u = currentUser;
-  document.getElementById("edit-nickname").value = u.nickname || '';
-  document.getElementById("edit-email-display").value = u.email || '';
-  document.getElementById("edit-description").value = u.description || '';
-  document.getElementById("edit-avatar-url").value = u.avatar_url || '';
-  openModal("modal-edit-profile");
-}
+      function openEditModal() {
+        const u = currentUser;
+        document.getElementById("edit-nickname").value = u.nickname || "";
+        document.getElementById("edit-email-display").value = u.email || "";
+        document.getElementById("edit-description").value = u.description || "";
+        document.getElementById("edit-avatar-url").value = u.avatar_url || "";
+        openModal("modal-edit-profile");
+      }
 
-async function handleEditProfile(e) {
-  e.preventDefault();
-  const btn = document.getElementById("btn-submit-profile");
-  const nickname = document.getElementById("edit-nickname").value.trim();
-  
-  // Валидация никнейма
-  if (nickname.length > 20) {
-    const el = document.getElementById("error-edit-profile");
-    el.textContent = "Никнейм не может быть длиннее 20 символов";
-    el.classList.add("visible");
-    return;
-  }
-  
-  btn.disabled = true;
-  try {
-    const updated = await api.updateMyProfile({
-      nickname: nickname || null,  // ← отправляем nickname, email не трогаем!
-      description: document.getElementById("edit-description").value || null,
-      avatar_url: document.getElementById("edit-avatar-url").value || null,
-    });
-    currentUser = { ...currentUser, ...updated };
-    closeModal("modal-edit-profile");
-    showToast("Профиль обновлён!");
-    await loadProfile();
-  } catch(e) {
-    const el = document.getElementById("error-edit-profile");
-    el.textContent = e.message; el.classList.add("visible");
-  } finally { btn.disabled = false; }
-}
+      async function handleEditProfile(e) {
+        e.preventDefault();
+        const btn = document.getElementById("btn-submit-profile");
+        const nickname = document.getElementById("edit-nickname").value.trim();
 
-function onLoginSuccess() { window.location.reload(); }
-init();
-</script>
-<!-- EDIT PROFILE MODAL -->
-<div class="modal-overlay" id="modal-edit-profile">
-  <div class="modal">
-    <div class="modal-header">
-      <div class="modal-title">Редактировать профиль</div>
-      <button class="modal-close" onclick="closeModal('modal-edit-profile')">✕</button>
+        // Валидация никнейма
+        if (nickname.length > 20) {
+          const el = document.getElementById("error-edit-profile");
+          el.textContent = "Никнейм не может быть длиннее 20 символов";
+          el.classList.add("visible");
+          return;
+        }
+
+        btn.disabled = true;
+        try {
+          const updated = await api.updateMyProfile({
+            nickname: nickname || null, // ← отправляем nickname, email не трогаем!
+            description:
+              document.getElementById("edit-description").value || null,
+            avatar_url:
+              document.getElementById("edit-avatar-url").value || null,
+          });
+          currentUser = { ...currentUser, ...updated };
+          closeModal("modal-edit-profile");
+          showToast("Профиль обновлён!");
+          await loadProfile();
+        } catch (e) {
+          const el = document.getElementById("error-edit-profile");
+          el.textContent = e.message;
+          el.classList.add("visible");
+        } finally {
+          btn.disabled = false;
+        }
+      }
+
+      function onLoginSuccess() {
+        window.location.reload();
+      }
+      init();
+    </script>
+    <!-- EDIT PROFILE MODAL -->
+    <div class="modal-overlay" id="modal-edit-profile">
+      <div class="modal">
+        <div class="modal-header">
+          <div class="modal-title">Редактировать профиль</div>
+          <button
+            class="modal-close"
+            onclick="closeModal('modal-edit-profile')"
+          >
+            ✕
+          </button>
+        </div>
+        <div class="modal-body">
+          <form onsubmit="handleEditProfile(event)">
+            <div class="form-group">
+              <label class="form-label"
+                >Никнейм
+                <span style="color: var(--text3); font-size: 12px"
+                  >(макс. 20 символов)</span
+                ></label
+              >
+              <input
+                class="form-input"
+                id="edit-nickname"
+                type="text"
+                placeholder="Ваш никнейм"
+                maxlength="20"
+              />
+            </div>
+            <div class="form-group">
+              <label class="form-label"
+                >Логин
+                <span style="color: var(--text3); font-size: 12px"
+                  >(нельзя изменить)</span
+                ></label
+              >
+              <input
+                class="form-input"
+                id="edit-email-display"
+                type="text"
+                disabled
+                style="opacity: 0.6; cursor: not-allowed"
+              />
+            </div>
+            <div class="form-group">
+              <label class="form-label">URL аватарки</label>
+              <input
+                class="form-input"
+                id="edit-avatar-url"
+                type="url"
+                placeholder="https://example.com/photo.jpg"
+              />
+            </div>
+            <div class="form-group">
+              <label class="form-label">О себе</label>
+              <textarea
+                class="form-input"
+                id="edit-description"
+                rows="4"
+                placeholder="Расскажите о себе..."
+              ></textarea>
+            </div>
+            <div class="form-error" id="error-edit-profile"></div>
+            <div style="display: flex; gap: 10px; margin-top: 0.5rem">
+              <button type="submit" class="btn btn-red" id="btn-submit-profile">
+                Сохранить
+              </button>
+              <button
+                type="button"
+                class="btn btn-ghost"
+                onclick="closeModal('modal-edit-profile')"
+              >
+                Отмена
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
     </div>
-    <div class="modal-body">
-      <form onsubmit="handleEditProfile(event)">
-        <div class="form-group">
-          <label class="form-label">Никнейм <span style="color:var(--text3);font-size:12px;">(макс. 20 символов)</span></label>
-          <input class="form-input" id="edit-nickname" type="text" placeholder="Ваш никнейм" maxlength="20"/>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Почта <span style="color:var(--text3);font-size:12px;">(нельзя изменить)</span></label>
-          <input class="form-input" id="edit-email-display" type="text" disabled style="opacity:0.6;cursor:not-allowed;"/>
-        </div>
-        <div class="form-group">
-          <label class="form-label">URL аватарки</label>
-          <input class="form-input" id="edit-avatar-url" type="url" placeholder="https://example.com/photo.jpg"/>
-        </div>
-        <div class="form-group">
-          <label class="form-label">О себе</label>
-          <textarea class="form-input" id="edit-description" rows="4" placeholder="Расскажите о себе..."></textarea>
-        </div>
-        <div class="form-error" id="error-edit-profile"></div>
-        <div style="display:flex;gap:10px;margin-top:.5rem;">
-          <button type="submit" class="btn btn-red" id="btn-submit-profile">Сохранить</button>
-          <button type="button" class="btn btn-ghost" onclick="closeModal('modal-edit-profile')">Отмена</button>
-        </div>
-      </form>
-    </div>
-  </div>
-</div>
-</body>
+  </body>
 </html>
