@@ -16,7 +16,6 @@ class Settings(BaseSettings):
 
 settings = Settings()
 
-# Переопределение для Vercel
 if os.getenv("VERCEL"):
     settings.FRONTEND_URL = "https://f1-git-test-dvajfs-projects.vercel.app"
     settings.API_BASE_URL = "https://f1-git-test-dvajfs-projects.vercel.app/api"
