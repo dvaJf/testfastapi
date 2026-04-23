@@ -281,7 +281,7 @@ async function handleEditProfile(e) {
     btn.disabled = false; 
   }
 }
-// ==========================================
+
 // HEADER RENDER
 // ==========================================
 function renderHeader(activePage) {
