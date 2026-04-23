@@ -2,7 +2,7 @@ from fastapi import Depends
 from fastapi_users import FastAPIUsers
 from fastapi_users.authentication import AuthenticationBackend, BearerTransport, JWTStrategy
 from fastapi_users.db import SQLAlchemyUserDatabase
-from fastapi_users.manager import BaseUserManager, IntegerIDMixin  
+from fastapi_users.manager import BaseUserManager, IntegerIDMixin
 from sqlalchemy.ext.asyncio import AsyncSession
 from src.auth.config import SECRET, ACCESS_TOKEN_EXPIRE
 from src.auth.models import User
@@ -22,6 +22,16 @@ async def get_user_db(session: AsyncSession = Depends(get_session)):
 class UserManager(IntegerIDMixin, BaseUserManager[User, int]):
     reset_password_token_secret = SECRET
     verification_token_secret = SECRET
+    
+    # Отключаем валидацию email
+    async def validate_password(self, password: str, user) -> None:
+        # Минимальная валидация пароля
+        if len(password) < 3:
+            raise ValueError("Пароль слишком короткий")
+    
+    async def create(self, user_create, safe: bool = False, request=None):
+        # Переопределяем создание, чтобы не валидировать email
+        return await super().create(user_create, safe=safe, request=request)
 
 
 async def get_user_manager(user_db=Depends(get_user_db)):

@@ -9,7 +9,6 @@ from src.auth.config import SECRET, ACCESS_TOKEN_EXPIRE
 from src.database import session_maker
 from src.config import settings
 from fastapi_users.jwt import generate_jwt
-from datetime import datetime, timedelta
 import httpx
 
 router = APIRouter()
@@ -43,7 +42,7 @@ async def discord_authorize():
         "client_id": settings.DISCORD_CLIENT_ID,
         "redirect_uri": CALLBACK_URL,
         "response_type": "code",
-        "scope": "identify",  # убрали email из scope
+        "scope": "identify",
     }
     query = urlencode(params)
     url = f"{DISCORD_AUTH_URL}?{query}"
@@ -54,7 +53,6 @@ async def discord_callback(code: str | None = None):
     if not code:
         raise HTTPException(status_code=400, detail="No code")
     
-    # 1. Discord token exchange
     async with httpx.AsyncClient() as client:
         token_resp = await client.post(
             DISCORD_TOKEN_URL,
@@ -73,7 +71,6 @@ async def discord_callback(code: str | None = None):
         
         discord_access_token = token_resp.json()["access_token"]
         
-        # 2. Get Discord user
         user_resp = await client.get(
             DISCORD_API_URL,
             headers={"Authorization": f"Bearer {discord_access_token}"},
@@ -85,16 +82,14 @@ async def discord_callback(code: str | None = None):
         discord_user = user_resp.json()
     
     discord_id = discord_user.get("id")
-    username = discord_user.get("username")  # ← берём username из Discord
+    username = discord_user.get("username")
     avatar = discord_user.get("avatar")
     
     if not username:
         raise HTTPException(status_code=400, detail="Discord username not available")
     
-    # Формируем фейковый email из username (нужен для fastapi-users)
     fake_email = f"{username}@discord.local"
     
-    # 3. DB operations
     async with session_maker() as session:
         user_db = SQLAlchemyUserDatabase(session, User)
         manager = UserManager(user_db)
@@ -108,36 +103,29 @@ async def discord_callback(code: str | None = None):
         if not user_exists:
             user = await manager.create(
                 UserCreate(
-                    email=fake_email,           # ← фейковый email из username
+                    email=fake_email,
                     password=settings.SECRET + discord_id,
                     is_verified=False,
                     score=0,
-                    nickname=username,          # ← реальный Discord username
+                    nickname=username,
                 )
             )
             if avatar:
                 user.avatar_url = f"https://cdn.discordapp.com/avatars/{discord_id}/{avatar}.png"
             await session.commit()
         else:
-            # Обновляем nickname если пустой
             if username and not user.nickname:
                 user.nickname = username
             if avatar and not user.avatar_url:
                 user.avatar_url = f"https://cdn.discordapp.com/avatars/{discord_id}/{avatar}.png"
                 await session.commit()
     
-    # 4. Generate JWT
     token_data = {
         "sub": str(user.id),
         "aud": ["fastapi-users:auth"],
     }
-    jwt_token = generate_jwt(
-        token_data,
-        SECRET,
-        int(ACCESS_TOKEN_EXPIRE),
-    )
+    jwt_token = generate_jwt(token_data, SECRET, int(ACCESS_TOKEN_EXPIRE))
     
-    # 5. Redirect to frontend
     return RedirectResponse(
         url=f"{settings.FRONTEND_URL}/?access_token={jwt_token}",
         status_code=302

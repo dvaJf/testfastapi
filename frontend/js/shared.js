@@ -242,7 +242,45 @@ function getDisplayName(user) {
   if (user.email) return user.email.replace('@discord.local', '');
   return '—';
 }
-
+// ==========================================
+// EDIT PROFILE HANDLER
+// ==========================================
+async function handleEditProfile(e) {
+  e.preventDefault();
+  const btn = document.getElementById("btn-submit-profile");
+  const nickname = document.getElementById("edit-nickname").value.trim();
+  
+  if (nickname.length > 20) {
+    const el = document.getElementById("error-edit-profile");
+    el.textContent = "Никнейм не может быть длиннее 20 символов";
+    el.classList.add("visible");
+    return;
+  }
+  
+  btn.disabled = true;
+  try {
+    const data = {
+      nickname: nickname || null,
+      description: document.getElementById("edit-description").value || null,
+      avatar_url: document.getElementById("edit-avatar-url").value || null,
+    };
+    
+    const updated = await api.updateMyProfile(data);
+    currentUser = { ...currentUser, ...updated };
+    closeModal("modal-edit-profile");
+    showToast("Профиль обновлён!");
+    
+    // Перезагружаем профиль если есть функция
+    if (typeof loadProfile === "function") await loadProfile();
+    else window.location.reload();
+  } catch(e) {
+    const el = document.getElementById("error-edit-profile");
+    el.textContent = e.message || "Ошибка обновления"; 
+    el.classList.add("visible");
+  } finally { 
+    btn.disabled = false; 
+  }
+}
 // ==========================================
 // HEADER RENDER
 // ==========================================
