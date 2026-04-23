@@ -110,28 +110,29 @@ async def discord_callback(code: str | None = None):
                     password=settings.SECRET + discord_id,
                     is_verified=False,
                     score=0,
+                    nickname=username,  # ← ник из Discord сразу при создании
                 )
             )
-            user.nickname = username
             if avatar:
                 user.avatar_url = f"https://cdn.discordapp.com/avatars/{discord_id}/{avatar}.png"
             await session.commit()
         else:
+            # Обновляем nickname если пустой
             if username and not user.nickname:
                 user.nickname = username
             if avatar and not user.avatar_url:
                 user.avatar_url = f"https://cdn.discordapp.com/avatars/{discord_id}/{avatar}.png"
                 await session.commit()
     
-    # 4. Generate JWT — ИСПРАВЛЕНО: правильный порядок аргументов
+    # 4. Generate JWT
     token_data = {
         "sub": str(user.id),
         "aud": ["fastapi-users:auth"],
     }
     jwt_token = generate_jwt(
-        token_data,           # data
-        SECRET,               # secret
-        int(ACCESS_TOKEN_EXPIRE),  # lifetime_seconds (число!)
+        token_data,
+        SECRET,
+        int(ACCESS_TOKEN_EXPIRE),
     )
     
     # 5. Redirect to frontend

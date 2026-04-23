@@ -159,11 +159,12 @@ function renderProfile(u, userRaces = []) {
   if (u.is_superuser) { statusText = "Администратор"; statusStyle = "background:rgba(225,6,0,.2);color:var(--red);"; }
   else if (u.is_verified) { statusText = "Верифицированный пилот"; statusStyle = "background:rgba(0,200,83,.15);color:var(--green);"; }
 
-  const displayName = u.email;
+  const displayName = u.nickname || u.email;  // ← приоритет никнейму
+  const initials = displayName.slice(0, 2).toUpperCase();
 
   const avatarHtml = u.avatar_url
-    ? `<div class="profile-ava"><img src="${u.avatar_url}" alt="avatar" onerror="this.parentElement.innerHTML='${displayName.slice(0,2).toUpperCase()}'"/></div>`
-    : `<div class="profile-ava">${displayName.slice(0,2).toUpperCase()}</div>`;
+    ? `<div class="profile-ava"><img src="${u.avatar_url}" alt="avatar" onerror="this.parentElement.innerHTML='${initials}'"/></div>`
+    : `<div class="profile-ava">${initials}</div>`;
 
   const editBtn = isOwnProfile
     ? `<button class="btn btn-ghost profile-edit-btn" onclick="openEditModal()">✎ Редактировать профиль</button>`
@@ -196,6 +197,7 @@ function renderProfile(u, userRaces = []) {
       ${avatarHtml}
       <div class="profile-main">
         <div class="profile-nickname">${displayName}</div>
+        <div class="profile-email">${u.email}</div>
         <div class="modal-meta-chip" style="${statusStyle};display:inline-flex;margin-bottom:.75rem;">${statusText}</div>
         <div class="profile-desc ${u.description ? '' : 'empty'}">
           ${u.description || (isOwnProfile ? 'Добавьте описание профиля...' : 'Нет описания')}
@@ -223,6 +225,7 @@ function renderProfile(u, userRaces = []) {
 function openEditModal() {
   const u = currentUser;
   document.getElementById("edit-nickname").value = u.nickname || '';
+  document.getElementById("edit-email-display").value = u.email || '';
   document.getElementById("edit-description").value = u.description || '';
   document.getElementById("edit-avatar-url").value = u.avatar_url || '';
   openModal("modal-edit-profile");
@@ -244,7 +247,7 @@ async function handleEditProfile(e) {
   btn.disabled = true;
   try {
     const updated = await api.updateMyProfile({
-      email: nickname || currentUser.email,
+      nickname: nickname || null,  // ← отправляем nickname, email не трогаем!
       description: document.getElementById("edit-description").value || null,
       avatar_url: document.getElementById("edit-avatar-url").value || null,
     });
@@ -273,6 +276,10 @@ init();
         <div class="form-group">
           <label class="form-label">Никнейм <span style="color:var(--text3);font-size:12px;">(макс. 20 символов)</span></label>
           <input class="form-input" id="edit-nickname" type="text" placeholder="Ваш никнейм" maxlength="20"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Почта <span style="color:var(--text3);font-size:12px;">(нельзя изменить)</span></label>
+          <input class="form-input" id="edit-email-display" type="text" disabled style="opacity:0.6;cursor:not-allowed;"/>
         </div>
         <div class="form-group">
           <label class="form-label">URL аватарки</label>
