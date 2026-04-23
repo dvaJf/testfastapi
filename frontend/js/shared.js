@@ -198,7 +198,7 @@ async function handleLogin(e) {
     await api.login(form.email.value, form.password.value);
     currentUser = await api.getCurrentUser();
     updateAuthUI(); closeModal("modal-auth");
-    showToast(`Добро пожаловать, ${currentUser.email}!`);
+    showToast(`Добро пожаловать, ${getDisplayName(currentUser)}!`);
     form.reset();
     if (typeof onLoginSuccess === "function") onLoginSuccess();
   } catch (error) {
@@ -230,6 +230,18 @@ async function handleRegister(e) {
 
 async function handleForgotPassword(e) { e.preventDefault(); showToast("Функция в разработке", true); }
 async function handleResetPassword(e) { e.preventDefault(); showToast("Функция в разработке", true); }
+
+// ==========================================
+// DISPLAY NAME HELPER
+// ==========================================
+function getDisplayName(user) {
+  if (!user) return '—';
+  // Приоритет: nickname → email без @discord.local → email
+  if (user.nickname) return user.nickname;
+  if (user.email && !user.email.endsWith('@discord.local')) return user.email;
+  if (user.email) return user.email.replace('@discord.local', '');
+  return '—';
+}
 
 // ==========================================
 // HEADER RENDER

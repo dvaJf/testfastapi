@@ -73,7 +73,7 @@ async function loadLeaderboard() {
         ? `<span class="pos-badge ${bp <= 3 ? `pos-${bp}` : 'pos-other'}">${bp}</span>`
         : '<span style="color:var(--text3);">—</span>';
 
-      const displayName = user.nickname || user.email;  // ← приоритет никнейму
+        const displayName = user.nickname || (user.email ? user.email.replace('@discord.local', '') : '—');
       const initials = displayName.slice(0, 2).toUpperCase();
 
      return `

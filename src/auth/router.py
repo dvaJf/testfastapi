@@ -43,7 +43,7 @@ async def discord_authorize():
         "client_id": settings.DISCORD_CLIENT_ID,
         "redirect_uri": CALLBACK_URL,
         "response_type": "code",
-        "scope": "identify email",
+        "scope": "identify",  # убрали email из scope
     }
     query = urlencode(params)
     url = f"{DISCORD_AUTH_URL}?{query}"
@@ -84,13 +84,15 @@ async def discord_callback(code: str | None = None):
         
         discord_user = user_resp.json()
     
-    email = discord_user.get("email")
     discord_id = discord_user.get("id")
-    username = discord_user.get("username")
+    username = discord_user.get("username")  # ← берём username из Discord
     avatar = discord_user.get("avatar")
     
-    if not email:
-        raise HTTPException(status_code=400, detail="Discord email not available")
+    if not username:
+        raise HTTPException(status_code=400, detail="Discord username not available")
+    
+    # Формируем фейковый email из username (нужен для fastapi-users)
+    fake_email = f"{username}@discord.local"
     
     # 3. DB operations
     async with session_maker() as session:
@@ -98,7 +100,7 @@ async def discord_callback(code: str | None = None):
         manager = UserManager(user_db)
         
         try:
-            user = await manager.get_by_email(email)
+            user = await manager.get_by_email(fake_email)
             user_exists = True
         except Exception:
             user_exists = False
@@ -106,11 +108,11 @@ async def discord_callback(code: str | None = None):
         if not user_exists:
             user = await manager.create(
                 UserCreate(
-                    email=email,
+                    email=fake_email,           # ← фейковый email из username
                     password=settings.SECRET + discord_id,
                     is_verified=False,
                     score=0,
-                    nickname=username,  # ← ник из Discord сразу при создании
+                    nickname=username,          # ← реальный Discord username
                 )
             )
             if avatar:

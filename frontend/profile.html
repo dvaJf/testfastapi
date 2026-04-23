@@ -159,7 +159,7 @@ function renderProfile(u, userRaces = []) {
   if (u.is_superuser) { statusText = "Администратор"; statusStyle = "background:rgba(225,6,0,.2);color:var(--red);"; }
   else if (u.is_verified) { statusText = "Верифицированный пилот"; statusStyle = "background:rgba(0,200,83,.15);color:var(--green);"; }
 
-  const displayName = u.nickname || u.email;  // ← приоритет никнейму
+  const displayName = u.nickname || (u.email ? u.email.replace('@discord.local', '') : 'Пилот');
   const initials = displayName.slice(0, 2).toUpperCase();
 
   const avatarHtml = u.avatar_url
