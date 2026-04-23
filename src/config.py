@@ -17,5 +17,5 @@ class Settings(BaseSettings):
 settings = Settings()
 
 if os.getenv("VERCEL"):
-    settings.FRONTEND_URL = "https://f1u.vercel.app/"
+    settings.FRONTEND_URL = "https://f1u.vercel.app"
     settings.API_BASE_URL = "https://f1u.vercel.app/api"
