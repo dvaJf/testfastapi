@@ -282,7 +282,7 @@ async function handleEditProfile(e) {
   }
 }
 
-// HEADER RENDER
+
 // ================= ===============
 function renderHeader(activePage) {
   const header = document.getElementById("site-header");
