@@ -2,7 +2,7 @@
 // CONFIGURATION
 // ==========================================
 const CONFIG = {
-  API_URL: "http://127.0.0.1:8000/api",
+  API_URL: "http://f1-git-test-dvajfs-projects.vercel.app/api",
   TOKEN_KEY: "f1_access_token",
 };
 
