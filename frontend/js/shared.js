@@ -2,7 +2,7 @@
 // CONFIGURATION
 // ==========================================
 const CONFIG = {
-  API_URL: "https://f1-git-test-dvajfs-projects.vercel.app/api",
+  API_URL: "http://127.0.0.1:8000/api",
   TOKEN_KEY: "f1_access_token",
 };
 
@@ -124,8 +124,18 @@ function getStatusClass(status) {
 // AUTH
 // ==========================================
 async function initAuth() {
+  // Проверяем токен из URL после Discord redirect
+  const params = new URLSearchParams(window.location.search);
+  const token = params.get('access_token');
+  if (token) {
+    api.setToken(token);
+    // Убираем токен из URL
+    window.history.replaceState({}, '', window.location.pathname);
+  }
+
   if (api.getToken()) {
-    try { currentUser = await api.getCurrentUser(); } catch (e) { api.removeToken(); currentUser = null; }
+    try { currentUser = await api.getCurrentUser(); } 
+    catch (e) { api.removeToken(); currentUser = null; }
   }
   updateAuthUI();
   return currentUser;
@@ -162,7 +172,12 @@ function logout() {
   updateAuthUI(); showToast("Вы вышли из аккаунта");
   setTimeout(() => window.location.href = "/", 800);
 }
-
+function loginWithDiscord() {
+  // Открываем Discord OAuth в этом же окне
+  // После авторизации Discord редиректит на /api/auth/discord/callback
+  // FastAPI Users обрабатывает callback и редиректит на фронт с токеном
+  window.location.href = '/api/auth/discord/authorize';
+}
 function openAuthModal(tab = "login") { switchAuthTab(tab); openModal("modal-auth"); }
 
 function switchAuthTab(tab) {
@@ -297,12 +312,11 @@ function injectAuthModal() {
               <label class="form-label">Пароль</label>
               <input class="form-input" type="password" name="password" placeholder="••••••••" required minlength="6"/>
             </div>
-            <div style="text-align:right;margin-bottom:1rem;">
-              <a onclick="switchAuthTab('forgot')" style="color:var(--red);cursor:pointer;font-size:12px;">Забыли пароль?</a>
-            </div>
+           
             <button type="submit" class="btn btn-red" style="width:100%" id="btn-submit-login">Войти</button>
             <div class="form-footer">Нет аккаунта? <a onclick="switchAuthTab('signup')">Зарегистрироваться</a></div>
           </form>
+
           <form id="form-signup" style="display:none" onsubmit="handleRegister(event)">
             <div class="form-group">
               <label class="form-label">Имя</label>
@@ -319,10 +333,18 @@ function injectAuthModal() {
                 <input class="form-input" type="password" name="password2" placeholder="••••••••" required minlength="6"/>
               </div>
             </div>
+            
             <div class="form-error" id="error-signup-general"></div>
             <button type="submit" class="btn btn-red" style="width:100%" id="btn-submit-signup">Создать аккаунт</button>
             <div class="form-footer">Уже есть аккаунт? <a onclick="switchAuthTab('login')">Войти</a></div>
           </form>
+          <div class="divider"><span>или</span></div>
+<button type="button" class="btn-discord" onclick="window.location.href='/api/auth/discord/authorize'">
+  <svg class="discord-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+    <path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057.1 18.08.113 18.1.131 18.11a19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03z"/>
+  </svg>
+  Войти через Discord
+</button>
           <form id="form-forgot" style="display:none" onsubmit="handleForgotPassword(event)">
             <div class="form-group">
               <label class="form-label">Имя</label>

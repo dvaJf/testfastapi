@@ -256,3 +256,67 @@ textarea.form-input{min-height:100px;resize:vertical}
   .news-section{padding:1rem}
   .news-hero{padding:2rem 1rem 1rem}
 }
+/* Разделитель */
+.divider {
+  display: flex;
+  align-items: center;
+  margin: 1.25rem 0;
+  color: var(--text3);
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.divider::before,
+.divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+.divider span {
+  padding: 0 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Кнопка Discord */
+.btn-discord {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  padding: 11px 16px;
+  border-radius: 8px;
+  border: 1px solid #5865F2;
+  background: rgba(88, 101, 242, 0.08);
+  color: #5865F2;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-discord:hover {
+  background: #5865F2;
+  color: #fff;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(88, 101, 242, 0.3);
+}
+
+.btn-discord:active {
+  transform: translateY(0);
+}
+
+.discord-icon {
+  width: 20px;
+  height: 20px;
+  fill: currentColor;
+  transition: transform 0.2s ease;
+}
+
+.btn-discord:hover .discord-icon {
+  transform: scale(1.1);
+}

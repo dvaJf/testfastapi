@@ -12,6 +12,48 @@ from src.auth.utils import create_first_admin
 from src.config import settings
 from src.database import engine, Base
 
+import json
+from fastapi import Request
+from fastapi.responses import RedirectResponse
+from starlette.middleware.base import BaseHTTPMiddleware
+
+class DiscordOAuthRedirectMiddleware(BaseHTTPMiddleware):
+    """Перехватывает JSON-ответ от /api/auth/discord/callback и редиректит на фронт с токеном в URL"""
+    
+    async def dispatch(self, request: Request, call_next):
+        response = await call_next(request)
+        
+        # Проверяем только callback Discord OAuth
+        if request.url.path != "/api/auth/discord/callback":
+            return response
+        
+        # Проверяем что ответ успешный и содержит JSON
+        if response.status_code != 200:
+            return response
+            
+        # Читаем тело ответа
+        body = b""
+        async for chunk in response.body_iterator:
+            body += chunk
+        
+        try:
+            data = json.loads(body)
+            access_token = data.get("access_token")
+            
+            if access_token:
+                # Редиректим на фронт с токеном в query params
+                frontend_url = settings.FRONTEND_URL
+                redirect_url = f"{frontend_url}/?access_token={access_token}"
+                return RedirectResponse(url=redirect_url, status_code=302)
+        except (json.JSONDecodeError, AttributeError):
+            pass
+        
+        # Если что-то пошло не так — возвращаем оригинальный ответ
+        # Нужно восстановить response, т.к. мы уже прочитали body
+        from starlette.responses import Response
+        return Response(content=body, status_code=response.status_code, headers=dict(response.headers))
+
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -23,7 +65,7 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(lifespan=lifespan)
-
+app.add_middleware(DiscordOAuthRedirectMiddleware)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -31,7 +73,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
+app.add_middleware(DiscordOAuthRedirectMiddleware)
 # API routers
 
 

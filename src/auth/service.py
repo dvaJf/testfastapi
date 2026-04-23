@@ -7,7 +7,13 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.auth.config import SECRET, ACCESS_TOKEN_EXPIRE
 from src.auth.models import User
 from src.database import get_session
+from httpx_oauth.clients.discord import DiscordOAuth2
+from src.config import settings
 
+discord_oauth_client = DiscordOAuth2(
+    settings.DISCORD_CLIENT_ID,
+    settings.DISCORD_CLIENT_SECRET,
+)
 
 async def get_user_db(session: AsyncSession = Depends(get_session)):
     yield SQLAlchemyUserDatabase(session, User)
