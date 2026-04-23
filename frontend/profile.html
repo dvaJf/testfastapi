@@ -159,7 +159,7 @@ function renderProfile(u, userRaces = []) {
   if (u.is_superuser) { statusText = "Администратор"; statusStyle = "background:rgba(225,6,0,.2);color:var(--red);"; }
   else if (u.is_verified) { statusText = "Верифицированный пилот"; statusStyle = "background:rgba(0,200,83,.15);color:var(--green);"; }
 
-  const displayName = u.nickname;
+  const displayName = u.email;
 
   const avatarHtml = u.avatar_url
     ? `<div class="profile-ava"><img src="${u.avatar_url}" alt="avatar" onerror="this.parentElement.innerHTML='${displayName.slice(0,2).toUpperCase()}'"/></div>`
