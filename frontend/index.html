@@ -25,36 +25,13 @@
       </section>
 
       <!-- HOME NEWS -->
-      <section
-        class="races-section"
-        style="padding-top: 0; padding-bottom: 1rem"
-      >
+      <section class="races-section" style="padding-top: 0; padding-bottom: 1rem">
         <div class="section-header">
           <span class="section-title">Последние новости</span>
-          <a
-            class="nav-btn"
-            href="/news"
-            style="
-              font-size: 12px;
-              padding: 4px 12px;
-              text-decoration: none;
-              display: inline-block;
-            "
-            >Все новости →</a
-          >
+          <a class="nav-btn" href="/news" style="font-size: 12px; padding: 4px 12px; text-decoration: none; display: inline-block;">Все новости →</a>
         </div>
-        <div
-          id="home-news-grid"
-          style="
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 1.5rem;
-          "
-        >
-          <div
-            class="skeleton"
-            style="height: 200px; border-radius: 12px"
-          ></div>
+        <div id="home-news-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem;">
+          <div class="skeleton" style="height: 200px; border-radius: 12px"></div>
         </div>
       </section>
 
@@ -88,21 +65,12 @@
           <table class="admin-table" id="admin-races-table">
             <thead>
               <tr>
-                <th>ID</th>
-                <th>Название</th>
-                <th>Тип</th>
-                <th>Дата</th>
-                <th>Статус</th>
-                <th>Участники</th>
-                <th>Действия</th>
+                <th>ID</th><th>Название</th><th>Тип</th><th>Дата</th>
+                <th>Статус</th><th>Участники</th><th>Действия</th>
               </tr>
             </thead>
             <tbody id="admin-races-tbody">
-              <tr>
-                <td colspan="7" style="text-align: center; color: var(--text3)">
-                  Загрузка...
-                </td>
-              </tr>
+              <tr><td colspan="7" style="text-align: center; color: var(--text3)">Загрузка...</td></tr>
             </tbody>
           </table>
         </div>
@@ -111,9 +79,7 @@
       <!-- FILTER BAR -->
       <div class="filter-bar">
         <button class="filter-chip" data-filter="all">Все гонки</button>
-        <button class="filter-chip active" data-filter="Регистрация">
-          Регистрация
-        </button>
+        <button class="filter-chip active" data-filter="Регистрация">Регистрация</button>
         <button class="filter-chip" data-filter="Завершена">Результаты</button>
       </div>
 
@@ -136,55 +102,28 @@
       <div class="modal">
         <div class="modal-header">
           <div class="modal-title">Создать гонку</div>
-          <button class="modal-close" onclick="closeModal('modal-create')">
-            ✕
-          </button>
+          <button class="modal-close" onclick="closeModal('modal-create')">✕</button>
         </div>
         <div class="modal-body">
           <form id="form-create" onsubmit="handleCreateRace(event)">
             <div class="form-group">
               <label class="form-label">Название гонки</label>
-              <input
-                class="form-input"
-                type="text"
-                name="name"
-                placeholder="Гран-При Москвы"
-                required
-              />
+              <input class="form-input" type="text" name="name" placeholder="Гран-При Москвы" required />
             </div>
             <div class="form-row">
               <div class="form-group">
                 <label class="form-label">Тип трассы</label>
-                <input
-                  class="form-input"
-                  type="text"
-                  name="race"
-                  placeholder="Городская трасса"
-                  required
-                />
+                <input class="form-input" type="text" name="race" placeholder="Городская трасса" required />
               </div>
               <div class="form-group">
                 <label class="form-label">Макс. участников</label>
-                <input
-                  class="form-input"
-                  type="number"
-                  name="maxuser"
-                  value="20"
-                  min="2"
-                  max="100"
-                  required
-                />
+                <input class="form-input" type="number" name="maxuser" value="20" min="2" max="100" required />
               </div>
             </div>
             <div class="form-row">
               <div class="form-group">
                 <label class="form-label">Дата и время</label>
-                <input
-                  class="form-input"
-                  type="datetime-local"
-                  name="time"
-                  required
-                />
+                <input class="form-input" type="datetime-local" name="time" required />
               </div>
               <div class="form-group">
                 <label class="form-label">Статус</label>
@@ -196,25 +135,12 @@
             </div>
             <div class="form-group">
               <label class="form-label">Описание</label>
-              <textarea
-                class="form-input"
-                rows="3"
-                name="about"
-                placeholder="Расскажите о гонке..."
-              ></textarea>
+              <textarea class="form-input" rows="3" name="about" placeholder="Расскажите о гонке..."></textarea>
             </div>
             <div class="form-error" id="error-create-race"></div>
             <div style="display: flex; gap: 10px; margin-top: 0.5rem">
-              <button type="submit" class="btn btn-red" id="btn-submit-create">
-                Создать
-              </button>
-              <button
-                type="button"
-                class="btn btn-ghost"
-                onclick="closeModal('modal-create')"
-              >
-                Отмена
-              </button>
+              <button type="submit" class="btn btn-red" id="btn-submit-create">Создать</button>
+              <button type="button" class="btn btn-ghost" onclick="closeModal('modal-create')">Отмена</button>
             </div>
           </form>
         </div>
@@ -226,43 +152,29 @@
       <div class="modal">
         <div class="modal-header">
           <div class="modal-title">Редактировать гонку</div>
-          <button class="modal-close" onclick="closeModal('modal-edit')">
-            ✕
-          </button>
+          <button class="modal-close" onclick="closeModal('modal-edit')">✕</button>
         </div>
         <div class="modal-body">
           <form id="form-edit" onsubmit="handleEditRace(event)">
             <input type="hidden" name="race_id" id="edit-race-id" />
             <div class="form-group">
-              <label class="form-label">Название гонки</label
-              ><input class="form-input" type="text" name="name" required />
+              <label class="form-label">Название гонки</label>
+              <input class="form-input" type="text" name="name" required />
             </div>
             <div class="form-row">
               <div class="form-group">
-                <label class="form-label">Тип трассы</label
-                ><input class="form-input" type="text" name="race" required />
+                <label class="form-label">Тип трассы</label>
+                <input class="form-input" type="text" name="race" required />
               </div>
               <div class="form-group">
-                <label class="form-label">Макс. участников</label
-                ><input
-                  class="form-input"
-                  type="number"
-                  name="maxuser"
-                  min="2"
-                  max="100"
-                  required
-                />
+                <label class="form-label">Макс. участников</label>
+                <input class="form-input" type="number" name="maxuser" min="2" max="100" required />
               </div>
             </div>
             <div class="form-row">
               <div class="form-group">
-                <label class="form-label">Дата и время</label
-                ><input
-                  class="form-input"
-                  type="datetime-local"
-                  name="time"
-                  required
-                />
+                <label class="form-label">Дата и время</label>
+                <input class="form-input" type="datetime-local" name="time" required />
               </div>
               <div class="form-group">
                 <label class="form-label">Статус</label>
@@ -273,21 +185,13 @@
               </div>
             </div>
             <div class="form-group">
-              <label class="form-label">Описание</label
-              ><textarea class="form-input" rows="3" name="about"></textarea>
+              <label class="form-label">Описание</label>
+              <textarea class="form-input" rows="3" name="about"></textarea>
             </div>
             <div class="form-error" id="error-edit-race"></div>
             <div style="display: flex; gap: 10px; margin-top: 0.5rem">
-              <button type="submit" class="btn btn-red" id="btn-submit-edit">
-                Сохранить
-              </button>
-              <button
-                type="button"
-                class="btn btn-ghost"
-                onclick="closeModal('modal-edit')"
-              >
-                Отмена
-              </button>
+              <button type="submit" class="btn btn-red" id="btn-submit-edit">Сохранить</button>
+              <button type="button" class="btn btn-ghost" onclick="closeModal('modal-edit')">Отмена</button>
             </div>
           </form>
         </div>
@@ -299,19 +203,13 @@
       <div class="modal">
         <div class="modal-header">
           <div class="modal-title">Установить результаты</div>
-          <button class="modal-close" onclick="closeModal('modal-results')">
-            ✕
-          </button>
+          <button class="modal-close" onclick="closeModal('modal-results')">✕</button>
         </div>
         <div class="modal-body">
           <div id="results-form-container"></div>
           <div style="display: flex; gap: 10px; margin-top: 1rem">
-            <button class="btn btn-red" onclick="saveResults()">
-              Сохранить
-            </button>
-            <button class="btn btn-ghost" onclick="closeModal('modal-results')">
-              Отмена
-            </button>
+            <button class="btn btn-red" onclick="saveResults()">Сохранить</button>
+            <button class="btn btn-ghost" onclick="closeModal('modal-results')">Отмена</button>
           </div>
         </div>
       </div>
@@ -321,7 +219,6 @@
     <script>
       let races = [];
       let registrations = new Set();
-      let participants = new Map();
       let currentFilter = "Регистрация";
       let editingRace = null;
 
@@ -343,9 +240,7 @@
 
       document.querySelectorAll(".filter-chip").forEach((chip) => {
         chip.addEventListener("click", (e) => {
-          document
-            .querySelectorAll(".filter-chip")
-            .forEach((c) => c.classList.remove("active"));
+          document.querySelectorAll(".filter-chip").forEach((c) => c.classList.remove("active"));
           e.target.classList.add("active");
           currentFilter = e.target.dataset.filter;
           renderRaces();
@@ -364,16 +259,26 @@
         }
       }
 
+      // Запрашиваем участников только для гонок со статусом "Регистрация"
+      // (только они показывают кнопку "Участвовать"/"Выйти")
+      // Все запросы — параллельно через Promise.all
       async function loadUserRegistrations() {
         registrations.clear();
-        for (const race of races) {
-          try {
-            const p = await api.getRaceParticipants(race.id);
-            participants.set(race.id, p);
-            if (p.some((x) => x.user_id === currentUser.id))
-              registrations.add(race.id);
-          } catch (e) {}
-        }
+
+        const openRaces = races.filter((r) => r.status === "Регистрация");
+        if (!openRaces.length) return;
+
+        const results = await Promise.all(
+          openRaces.map((race) =>
+            api.getRaceParticipants(race.id).catch(() => [])
+          )
+        );
+
+        results.forEach((participants, i) => {
+          if (participants.some((p) => p.user_id === currentUser.id)) {
+            registrations.add(openRaces[i].id);
+          }
+        });
       }
 
       async function loadHomeNews() {
@@ -389,26 +294,20 @@
           grid.innerHTML = latest
             .map(
               (n) => `
-      <a href="/news/${n.id}" class="news-card" style="text-decoration:none;">
-        <div class="news-card-image" style="height:140px;">
-          ${
-            n.image_url
-              ? `<img src="${n.image_url}" alt="${n.title}" onerror="this.parentElement.innerHTML='<div class=\\'news-card-image-placeholder\\'>📰</div>'">`
-              : '<div class="news-card-image-placeholder">📰</div>'
-          }
-        </div>
-        <div class="news-card-content" style="padding:1rem;">
-          <div class="news-card-date" style="font-size:10px;">📅 ${formatDate(
-            n.created_at
-          )}</div>
-          <h3 class="news-card-title" style="font-size:16px;margin-bottom:.5rem;">${
-            n.title
-          }</h3>
-          <p class="news-card-summary" style="font-size:12px;-webkit-line-clamp:2;">${
-            n.summary || n.content.substring(0, 120)
-          }...</p>
-        </div>
-      </a>`
+              <a href="/news/${n.id}" class="news-card" style="text-decoration:none;">
+                <div class="news-card-image" style="height:140px;">
+                  ${
+                    n.image_url
+                      ? `<img src="${n.image_url}" alt="${n.title}" onerror="this.parentElement.innerHTML='<div class=\\'news-card-image-placeholder\\'>📰</div>'">`
+                      : '<div class="news-card-image-placeholder">📰</div>'
+                  }
+                </div>
+                <div class="news-card-content" style="padding:1rem;">
+                  <div class="news-card-date" style="font-size:10px;">📅 ${formatDate(n.created_at)}</div>
+                  <h3 class="news-card-title" style="font-size:16px;margin-bottom:.5rem;">${n.title}</h3>
+                  <p class="news-card-summary" style="font-size:12px;-webkit-line-clamp:2;">${n.summary || n.content.substring(0, 120)}...</p>
+                </div>
+              </a>`
             )
             .join("");
         } catch (e) {}
@@ -436,61 +335,35 @@
             const canEdit = canEditRace(race);
 
             return `
-      <div class="race-card" onclick="window.location.href='/races/${race.id}'">
-        <div class="race-card-top">
-          <div class="race-type">${race.race}</div>
-          <span class="status-badge ${getStatusClass(race.status)}">${
-              race.status
-            }</span>
-        </div>
-        <h2>${race.name}</h2>
-        <div class="race-card-meta">
-          <span>📅 ${formatDate(race.time)}</span>
-          ${race.creator_email ? `<span>👤 ${race.creator_email}</span>` : ""}
-          ${
-            race.organizer_likes > 0
-              ? `<span style="color:var(--green)">👍 ${race.organizer_likes}</span>`
-              : ""
-          }
-          ${
-            race.organizer_dislikes > 0
-              ? `<span style="color:var(--red)">👎 ${race.organizer_dislikes}</span>`
-              : ""
-          }
-        </div>
-        <div class="race-card-footer">
-          <div class="capacity-bar-wrap">
-            <div class="capacity-label"><span>Места</span><span>${
-              race.users
-            } / ${race.maxuser}</span></div>
-            <div class="capacity-bar"><div class="capacity-fill ${fillClass}" style="width:${pct}%"></div></div>
-          </div>
-          <div style="display:flex;gap:8px;">
-            ${
-              canEdit
-                ? `<button class="register-btn" onclick="event.stopPropagation();openEditModal(${race.id})" title="Редактировать">✎</button>`
-                : ""
-            }
-            ${
-              race.status === "Завершена" && canEdit
-                ? `<button class="register-btn" onclick="event.stopPropagation();openResultsModal(${race.id})" title="Результаты">🏆</button>`
-                : ""
-            }
-            ${
-              race.status === "Регистрация"
-                ? `
-              <button class="register-btn ${isRegistered ? "registered" : ""}"
-                onclick="event.stopPropagation();toggleRegistration(${race.id})"
-                ${
-                  !isRegistered && race.users >= race.maxuser ? "disabled" : ""
-                }>
-                ${isRegistered ? "Выйти" : "Участвовать"}
-              </button>`
-                : ""
-            }
-          </div>
-        </div>
-      </div>`;
+            <div class="race-card" onclick="window.location.href='/races/${race.id}'">
+              <div class="race-card-top">
+                <div class="race-type">${race.race}</div>
+                <span class="status-badge ${getStatusClass(race.status)}">${race.status}</span>
+              </div>
+              <h2>${race.name}</h2>
+              <div class="race-card-meta">
+                <span>📅 ${formatDate(race.time)}</span>
+                ${race.creator_email ? `<span>👤 ${race.creator_email}</span>` : ""}
+                ${race.organizer_likes > 0 ? `<span style="color:var(--green)">👍 ${race.organizer_likes}</span>` : ""}
+                ${race.organizer_dislikes > 0 ? `<span style="color:var(--red)">👎 ${race.organizer_dislikes}</span>` : ""}
+              </div>
+              <div class="race-card-footer">
+                <div class="capacity-bar-wrap">
+                  <div class="capacity-label"><span>Места</span><span>${race.users} / ${race.maxuser}</span></div>
+                  <div class="capacity-bar"><div class="capacity-fill ${fillClass}" style="width:${pct}%"></div></div>
+                </div>
+                <div style="display:flex;gap:8px;">
+                  ${canEdit ? `<button class="register-btn" onclick="event.stopPropagation();openEditModal(${race.id})" title="Редактировать">✎</button>` : ""}
+                  ${race.status === "Завершена" && canEdit ? `<button class="register-btn" onclick="event.stopPropagation();openResultsModal(${race.id})" title="Результаты">🏆</button>` : ""}
+                  ${race.status === "Регистрация" ? `
+                    <button class="register-btn ${isRegistered ? "registered" : ""}"
+                      onclick="event.stopPropagation();toggleRegistration(${race.id})"
+                      ${!isRegistered && race.users >= race.maxuser ? "disabled" : ""}>
+                      ${isRegistered ? "Выйти" : "Участвовать"}
+                    </button>` : ""}
+                </div>
+              </div>
+            </div>`;
           })
           .join("");
       }
@@ -498,20 +371,12 @@
       function canEditRace(race) {
         if (!currentUser) return false;
         if (currentUser.is_superuser) return true;
-        if (
-          currentUser.is_verified &&
-          race &&
-          race.created_by === currentUser.id
-        )
-          return true;
+        if (currentUser.is_verified && race && race.created_by === currentUser.id) return true;
         return false;
       }
 
       async function toggleRegistration(raceId) {
-        if (!currentUser) {
-          openAuthModal("login");
-          return;
-        }
+        if (!currentUser) { openAuthModal("login"); return; }
         try {
           if (registrations.has(raceId)) {
             await api.unregisterFromRace(raceId);
@@ -613,10 +478,10 @@
                 participants
                   .map(
                     (p) => `
-          <div style="display:flex;align-items:center;gap:12px;padding:12px;background:var(--surface2);border-radius:8px;border:1px solid var(--border);">
-            <div style="flex:1;font-size:14px;">${p.username}</div>
-            <input type="number" class="form-input" style="width:80px;text-align:center;" min="1" placeholder="-" data-user-id="${p.user_id}"/>
-          </div>`
+                    <div style="display:flex;align-items:center;gap:12px;padding:12px;background:var(--surface2);border-radius:8px;border:1px solid var(--border);">
+                      <div style="flex:1;font-size:14px;">${p.username}</div>
+                      <input type="number" class="form-input" style="width:80px;text-align:center;" min="1" placeholder="-" data-user-id="${p.user_id}"/>
+                    </div>`
                   )
                   .join("") +
                 "</div>";
@@ -628,27 +493,19 @@
       }
 
       async function saveResults() {
-        const inputs = document.querySelectorAll(
-          "#results-form-container input[data-user-id]"
-        );
+        const inputs = document.querySelectorAll("#results-form-container input[data-user-id]");
         const results = [];
         const positions = new Set();
         for (const input of inputs) {
           const userId = parseInt(input.dataset.userId);
           const position = input.value ? parseInt(input.value) : null;
           if (position !== null && !isNaN(position)) {
-            if (positions.has(position)) {
-              showToast("Позиции должны быть уникальными", true);
-              return;
-            }
+            if (positions.has(position)) { showToast("Позиции должны быть уникальными", true); return; }
             positions.add(position);
             results.push({ user_id: userId, position });
           }
         }
-        if (!results.length) {
-          showToast("Укажите хотя бы один результат", true);
-          return;
-        }
+        if (!results.length) { showToast("Укажите хотя бы один результат", true); return; }
         try {
           await api.setRaceResults(window._resultsRaceId, results);
           closeModal("modal-results");
@@ -662,53 +519,36 @@
       function updateAdminStats() {
         if (!currentUser?.is_superuser) return;
         document.getElementById("admin-stat-total").textContent = races.length;
-        document.getElementById("admin-stat-open").textContent = races.filter(
-          (r) => r.status === "Регистрация"
-        ).length;
-        document.getElementById("admin-stat-users").textContent = races.reduce(
-          (s, r) => s + r.users,
-          0
-        );
-        document.getElementById("admin-stat-finished").textContent =
-          races.filter((r) => r.status === "Завершена").length;
+        document.getElementById("admin-stat-open").textContent = races.filter((r) => r.status === "Регистрация").length;
+        document.getElementById("admin-stat-users").textContent = races.reduce((s, r) => s + r.users, 0);
+        document.getElementById("admin-stat-finished").textContent = races.filter((r) => r.status === "Завершена").length;
       }
 
       function renderAdminTable() {
         if (!currentUser?.is_superuser) return;
         const tbody = document.getElementById("admin-races-tbody");
         if (!races.length) {
-          tbody.innerHTML =
-            '<tr><td colspan="7" style="text-align:center;color:var(--text3);">Нет гонок</td></tr>';
+          tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--text3);">Нет гонок</td></tr>';
           return;
         }
         tbody.innerHTML = races
           .map(
             (race) => `
-    <tr>
-      <td>${race.id}</td><td>${race.name}</td><td>${race.race}</td>
-      <td>${formatDate(race.time)}</td>
-      <td><span class="status-badge ${getStatusClass(race.status)}">${
-              race.status
-            }</span></td>
-      <td>${race.users} / ${race.maxuser}</td>
-      <td><div class="admin-actions-cell">
-        <button class="admin-btn edit" onclick="openEditModal(${
-          race.id
-        })">Редактировать</button>
-        ${
-          race.status === "Завершена"
-            ? `<button class="admin-btn" onclick="openResultsModal(${race.id})">Результаты</button>`
-            : ""
-        }
-      </div></td>
-    </tr>`
+            <tr>
+              <td>${race.id}</td><td>${race.name}</td><td>${race.race}</td>
+              <td>${formatDate(race.time)}</td>
+              <td><span class="status-badge ${getStatusClass(race.status)}">${race.status}</span></td>
+              <td>${race.users} / ${race.maxuser}</td>
+              <td><div class="admin-actions-cell">
+                <button class="admin-btn edit" onclick="openEditModal(${race.id})">Редактировать</button>
+                ${race.status === "Завершена" ? `<button class="admin-btn" onclick="openResultsModal(${race.id})">Результаты</button>` : ""}
+              </div></td>
+            </tr>`
           )
           .join("");
       }
 
-      function onLoginSuccess() {
-        loadRaces();
-      }
+      function onLoginSuccess() { loadRaces(); }
 
       init();
     </script>
