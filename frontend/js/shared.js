@@ -430,7 +430,14 @@ function injectToast() {
   document.body.appendChild(t);
 }
 
-// ==========================================
-// POINTS TABLE
-// ==========================================
-const POINTS_TABLE = {1:60,2:55,3:50,4:47,5:44,6:42,7:40,8:38,9:35,10:32,11:28,12:25,13:22,14:20,15:18,16:16,17:13,18:10,19:5,20:0};
+const SPECIAL_POSITIONS = { "-1": "DNS", "-2": "DSK" };
+const POINTS_TABLE = {1:60,2:55,3:50,4:47,5:44,6:42,7:40,8:38,9:35,10:32,11:28,12:25,13:22,14:20,15:18,16:16,17:13,18:10,19:5,20:0,"DNS":-30,"DSK":-15};
+
+// Потом функции
+function formatPosition(pos) {
+  return SPECIAL_POSITIONS[String(pos)] ?? pos;
+}
+function getPoints(pos) {
+  const label = formatPosition(pos);
+  return POINTS_TABLE[label] ?? 0;
+}
