@@ -854,8 +854,12 @@
               }
               const rows = results.results
                 .map((r) => {
-                  const posClass = r.position <= 3 ? `p${r.position}` : "other";
-                  const pts = POINTS_TABLE[r.position] || 0;
+                  const posLabel = formatPosition(r.position); // "DNS", "DSK" или число
+                  const posClass =
+                    r.position > 0 && r.position <= 3
+                      ? `p${r.position}`
+                      : "other";
+                  const pts = getPoints(r.position);
                   const profile = profilesMap[r.user_id];
                   const displayName =
                     profile?.nickname || r.username.split("@")[0];
@@ -866,7 +870,7 @@
                   return `<div class="podium-row ${
                     r.position <= 3 ? `p${r.position}` : ""
                   }">
-            <div class="podium-pos ${posClass}">${r.position}</div>
+            <div class="podium-pts ${pts === 0 ? "zero" : ""}">${pts > 0 ? `+${pts}` : pts < 0 ? pts : "—"}</div>
             ${avHtml}
             <div class="podium-name">${displayName}</div>
             <div class="podium-pts ${pts === 0 ? "zero" : ""}">${
@@ -1029,7 +1033,17 @@
                   profile?.nickname || x.username.split("@")[0];
                 return `<div style="display:flex;align-items:center;gap:12px;padding:12px;background:var(--surface2);border-radius:8px;border:1px solid var(--border);">
           <div style="flex:1;font-size:14px;">${displayName}</div>
-          <input type="number" class="form-input" style="width:80px;text-align:center;" min="1" placeholder="-" data-user-id="${x.user_id}"/>
+          <select class="form-input" style="width:100px;" data-user-id="${
+            p.user_id
+          }">
+  <option value="">—</option>
+  ${Array.from(
+    { length: 20 },
+    (_, i) => `<option value="${i + 1}">${i + 1}</option>`
+  ).join("")}
+  <option value="-1">DNS</option>
+  <option value="-2">DSK</option>
+</select>
         </div>`;
               })
               .join("") +
@@ -1045,7 +1059,7 @@
         const positions = new Set();
         for (const input of inputs) {
           const userId = parseInt(input.dataset.userId);
-          const position = input.value ? parseInt(input.value) : null;
+          const position = input.value !== "" ? parseInt(input.value) : null;
           if (position !== null && !isNaN(position)) {
             if (positions.has(position)) {
               showToast("Позиции должны быть уникальными", true);
