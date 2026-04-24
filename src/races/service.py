@@ -11,17 +11,17 @@ from src.exceptions import *
 pos = {
     1: 60, 2: 55, 3: 50, 4: 47, 5: 44, 6: 42, 7: 40, 8: 38, 9: 35, 10: 32,
     11: 28, 12: 25, 13: 22, 14: 20, 15: 18, 16: 16, 17: 13, 18: 10, 19: 5, 20: 0,
-    -1: -30,  # DNS
-    -2: -15,  # DSQ
+    21: -30,  # DNS (было -1)
+    22: -15,  # DSK (было -2)
+    23: -20,  # DNF (было -3)
 }
 
 def points_for_position(position: int) -> int:
     return pos.get(position, 0)
 
 def is_special_position(position: int) -> bool:
-    """DNS (-1) и DSQ (-2) — специальные позиции, не финиш."""
-    return position < 0
-
+    """DNS (21) и DSK (22) — специальные позиции, не финиш."""
+    return position in (21, 22)
 
 async def get_all_races_with_creator(session: AsyncSession):
     result = await session.execute(select(Race).options(selectinload(Race.creator)))
@@ -80,8 +80,8 @@ async def get_results(id: int, session: AsyncSession):
         .where(RaceResult.position.isnot(None))
         .options(selectinload(RaceResult.user))
         .order_by(
-            # 0 = финишировавшие (вперёд), 1 = DNS/DSQ (в конец)
-            case((RaceResult.position > 0, 0), else_=1),
+    # 0 = финишировавшие (вперёд), 1 = DNS/DSK/DNF (в конец)
+            case((RaceResult.position.between(1, 20), 0), else_=1),
             RaceResult.position,
         )
     )
@@ -135,7 +135,9 @@ async def set_results(race_id: int, results: list, session: AsyncSession):
 
     # Проверяем уникальность позиций ТОЛЬКО среди финишировавших (position > 0).
     # DNS (-1) и DSQ (-2) могут повторяться у нескольких пилотов.
-    finish_positions = [r.position for r in results if r.position > 0]
+    # Проверяем уникальность позиций ТОЛЬКО среди финишировавших (1-20).
+# DNS (21) и DSK (22) и DNF (23) могут повторяться у нескольких пилотов.
+    finish_positions = [r.position for r in results if 1 <= r.position <= 20]
     if len(finish_positions) != len(set(finish_positions)):
         raise BadRequestException(detail="Позиции финишировавших участников должны быть уникальными")
 

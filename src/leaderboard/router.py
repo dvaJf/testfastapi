@@ -22,13 +22,19 @@ async def get_public_profile(user_id: int, session: AsyncSession = Depends(get_s
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
 
-    stats_q = await session.execute(
-        select(
-            func.count(RaceResult.id).label("races_completed"),
-            func.min(RaceResult.position).label("best_position")
-        ).where(RaceResult.user_id == user_id).where(RaceResult.position.isnot(None))
+    count_q = await session.execute(
+        select(func.count(RaceResult.id).label("races_completed"))
+        .where(RaceResult.user_id == user_id)
+        .where(RaceResult.position.isnot(None))
     )
-    stats = stats_q.one()
+    best_q = await session.execute(
+        select(func.min(RaceResult.position).label("best_position"))
+        .where(RaceResult.user_id == user_id)
+        .where(RaceResult.position.isnot(None))
+        .where(RaceResult.position > 0)
+    )
+    races_completed = count_q.scalar() or 0
+    best_position = best_q.scalar()
 
     return {
     "id": user.id,
@@ -36,9 +42,9 @@ async def get_public_profile(user_id: int, session: AsyncSession = Depends(get_s
     "score": user.score,
     "is_superuser": user.is_superuser,
     "is_verified": user.is_verified,
-    "races_completed": stats.races_completed or 0,
-    "best_position": stats.best_position,
-    "nickname": user.nickname,          # +
-    "description": user.description,    # +
-    "avatar_url": user.avatar_url,      # +
+    "races_completed": races_completed,
+    "best_position": best_position,
+    "nickname": user.nickname,
+    "description": user.description,
+    "avatar_url": user.avatar_url,
 }

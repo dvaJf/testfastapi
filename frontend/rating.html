@@ -8,6 +8,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet"/>
   <link rel="stylesheet" href="/static/css/main.css"/>
+<base target="_blank">
 </head>
 <body>
 <div class="loading-overlay" id="loading-overlay"><div class="spinner"></div></div>
@@ -33,10 +34,11 @@
             <th style="width:100px;">Гонок</th>
             <th style="width:130px;">Лучший рез.</th>
             <th style="width:110px;">Очки</th>
+            <th style="width:110px;">Среднее</th>
           </tr>
         </thead>
         <tbody id="leaderboard-tbody">
-          <tr><td colspan="5" style="text-align:center;color:var(--text3);padding:3rem;">Загрузка...</td></tr>
+          <tr><td colspan="6" style="text-align:center;color:var(--text3);padding:3rem;">Загрузка...</td></tr>
         </tbody>
       </table>
     </div>
@@ -54,54 +56,93 @@ async function init() {
   document.getElementById("loading-overlay").classList.add("hidden");
 }
 
+function formatPosition(pos) {
+  if (pos === -1) return 21; // DNS → 21 место
+  if (pos === -3) return 22; // DNF → 22 место
+  return pos;
+}
+
 async function loadLeaderboard() {
   try {
     const allUsers = await api.getLeaderboard();
-    console.log('Пример пользователя:', allUsers[0]);
-    const users = allUsers.filter(u => Number(u.score) >= 0);
+    
+    // Фильтруем и считаем среднее на фронте
+    const users = allUsers
+      .filter(u => u.races_completed >= 1)
+      .map(u => ({
+        ...u,
+        // Пересчитываем best_position с учётом DNS(21) и DNF(22)
+        best_position: u.best_position ? formatPosition(u.best_position) : null,
+        avg_score: u.races_completed > 0 
+          ? (u.score / u.races_completed).toFixed(1) 
+          : '0.0'
+      }));
+    
+    // Сортируем по среднему (убывание), затем по очкам, затем по лучшей позиции
+    users.sort((a, b) => {
+      const avgA = parseFloat(a.avg_score);
+      const avgB = parseFloat(b.avg_score);
+      if (avgB !== avgA) return avgB - avgA;
+      if (b.score !== a.score) return b.score - a.score;
+      return (a.best_position || 999) - (b.best_position || 999);
+    });
+    
     document.getElementById("leaderboard-count").textContent = `${users.length} ${pluralize(users.length, "пилот", "пилота", "пилотов")}`;
     const tbody = document.getElementById("leaderboard-tbody");
-    if (!users.length) { tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:3rem;">Нет данных</td></tr>'; return; }
+    
+    if (!users.length) { 
+      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:3rem;">Нет данных</td></tr>'; 
+      return; 
+    }
 
     tbody.innerHTML = users.map((user, index) => {
       const rank = index + 1;
       let rankStyle = "", rowStyle = "";
-      if (rank === 1) { rankStyle = "background:rgba(255,193,7,.2);color:#ffc107;font-weight:700;"; rowStyle = "background:rgba(255,193,7,.04);"; }
-      else if (rank === 2) { rankStyle = "background:rgba(176,196,222,.2);color:#b0c4de;font-weight:700;"; rowStyle = "background:rgba(176,196,222,.03);"; }
-      else if (rank === 3) { rankStyle = "background:rgba(205,127,50,.2);color:#cd7f32;font-weight:700;"; rowStyle = "background:rgba(205,127,50,.03);"; }
+      
+      if (rank === 1) { 
+        rankStyle = "background:rgba(255,193,7,.2);color:#ffc107;font-weight:700;"; 
+        rowStyle = "background:rgba(255,193,7,.04);"; 
+      } else if (rank === 2) { 
+        rankStyle = "background:rgba(176,196,222,.2);color:#b0c4de;font-weight:700;"; 
+        rowStyle = "background:rgba(176,196,222,.03);"; 
+      } else if (rank === 3) { 
+        rankStyle = "background:rgba(205,127,50,.2);color:#cd7f32;font-weight:700;"; 
+        rowStyle = "background:rgba(205,127,50,.03);"; 
+      }
 
       const bp = Number(user.best_position);
-const bestHtml = (bp > 0)
-  ? `<span class="pos-badge ${bp <= 3 ? `pos-${bp}` : 'pos-other'}">${bp}</span>`
-  : '<span style="color:var(--text3);">—</span>';
+      const bestHtml = (bp > 0)
+        ? `<span class="pos-badge ${bp <= 3 ? `pos-${bp}` : 'pos-other'}">${bp}</span>`
+        : '<span style="color:var(--text3);">—</span>';
 
-        const displayName = user.nickname || 'Пилот #' + user.user_id;
-
+      const displayName = user.nickname || 'Пилот #' + user.user_id;
       const initials = displayName.slice(0, 2).toUpperCase();
 
-     return `
+      return `
         <tr style="${rowStyle}cursor:pointer;" onclick="window.location.href='/profile?id=${user.user_id}'">
           <td>
             <span style="display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:50%;${rankStyle}">${rank}</span>
           </td>
           <td>
-  <div style="display:flex;align-items:center;gap:10px;">
-    <div style="width:36px;height:36px;border-radius:50%;overflow:hidden;flex-shrink:0;background:var(--red);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;">
-      ${user.avatar_url
-        ? `<img src="${user.avatar_url}" style="width:100%;height:100%;object-fit:cover;" onerror="this.parentElement.innerHTML='${initials}'">`
-        : initials
-      }
-    </div>
-    <span style="font-weight:500;">${displayName}</span>
-  </div>
-</td>
+            <div style="display:flex;align-items:center;gap:10px;">
+              <div style="width:36px;height:36px;border-radius:50%;overflow:hidden;flex-shrink:0;background:var(--red);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;">
+                ${user.avatar_url
+                  ? `<img src="${user.avatar_url}" style="width:100%;height:100%;object-fit:cover;" onerror="this.parentElement.innerHTML='${initials}'">`
+                  : initials
+                }
+              </div>
+              <span style="font-weight:500;">${displayName}</span>
+            </div>
+          </td>
           <td style="color:var(--text2);">${user.races_completed || 0}</td>
           <td>${bestHtml}</td>
           <td><span class="hero-stat-val" style="font-size:22px;">${user.score || 0}</span></td>
+          <td><span style="font-weight:600;color:var(--yellow);">${user.avg_score}</span></td>
         </tr>`;
     }).join('');
+    
   } catch (e) {
-    document.getElementById("leaderboard-tbody").innerHTML = `<tr><td colspan="5" style="text-align:center;color:var(--red);padding:3rem;">${e.message}</td></tr>`;
+    document.getElementById("leaderboard-tbody").innerHTML = `<tr><td colspan="6" style="text-align:center;color:var(--red);padding:3rem;">${e.message}</td></tr>`;
   }
 }
 

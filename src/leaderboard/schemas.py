@@ -10,3 +10,4 @@ class LeaderboardEntry(BaseModel):
     best_position: Optional[int] = None
     avatar_url: Optional[str] = None
     nickname: Optional[str] = None
+    avg_score: float = 0.0

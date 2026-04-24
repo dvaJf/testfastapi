@@ -11,7 +11,8 @@
       rel="stylesheet"
     />
     <link rel="stylesheet" href="/static/css/main.css" />
-  </head>
+  <base target="_blank">
+</head>
   <body>
     <div class="loading-overlay" id="loading-overlay">
       <div class="spinner"></div>
@@ -480,7 +481,13 @@
                     (p) => `
                     <div style="display:flex;align-items:center;gap:12px;padding:12px;background:var(--surface2);border-radius:8px;border:1px solid var(--border);">
                       <div style="flex:1;font-size:14px;">${p.username}</div>
-                      <input type="number" class="form-input" style="width:80px;text-align:center;" min="1" placeholder="-" data-user-id="${p.user_id}"/>
+                      <select class="form-input" style="width:100px;text-align:center;" data-user-id="${p.user_id}">
+  <option value="">—</option>
+  ${Array.from({length:20},(_,i)=>`<option value="${i+1}">${i+1}</option>`).join('')}
+<option value="21">DNS</option>
+<option value="22">DSK</option>
+<option value="23">DNF</option>
+</select>
                     </div>`
                   )
                   .join("") +
@@ -493,14 +500,14 @@
       }
 
       async function saveResults() {
-        const inputs = document.querySelectorAll("#results-form-container input[data-user-id]");
+        const inputs = document.querySelectorAll("#results-form-container select[data-user-id]");
         const results = [];
         const positions = new Set();
         for (const input of inputs) {
           const userId = parseInt(input.dataset.userId);
-          const position = input.value ? parseInt(input.value) : null;
+          const position = input.value !== "" ? parseInt(input.value) : null;
           if (position !== null && !isNaN(position)) {
-            if (positions.has(position)) { showToast("Позиции должны быть уникальными", true); return; }
+            if (position > 0 && positions.has(position)) { showToast("Позиции должны быть уникальными", true); return; }
             positions.add(position);
             results.push({ user_id: userId, position });
           }
