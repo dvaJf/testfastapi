@@ -35,7 +35,7 @@ async def get_leaderboard(session):
     entries = []
     for u in users:
         races_completed = count_map.get(u.id, 0) or 0
-        if races_completed < 5:
+        if races_completed < 1:
             continue
         avg_score = round(u.score / races_completed, 2) if races_completed > 0 else 0.0
         entries.append({
