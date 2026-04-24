@@ -70,9 +70,9 @@ async function loadLeaderboard() {
       else if (rank === 3) { rankStyle = "background:rgba(205,127,50,.2);color:#cd7f32;font-weight:700;"; rowStyle = "background:rgba(205,127,50,.03);"; }
 
       const bp = user.best_position;
-      const bestHtml = bp
-        ? `<span class="pos-badge ${bp <= 3 ? `pos-${bp}` : 'pos-other'}">${bp}</span>`
-        : '<span style="color:var(--text3);">—</span>';
+const bestHtml = (bp && bp > 0)
+  ? `<span class="pos-badge ${bp <= 3 ? `pos-${bp}` : 'pos-other'}">${bp}</span>`
+  : '<span style="color:var(--text3);">—</span>';
 
         const displayName = user.nickname || 'Пилот #' + user.user_id;
 
