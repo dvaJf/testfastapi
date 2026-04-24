@@ -23,11 +23,13 @@ async def get_public_profile(user_id: int, session: AsyncSession = Depends(get_s
         raise HTTPException(status_code=404, detail="User not found")
 
     stats_q = await session.execute(
-        select(
-            func.count(RaceResult.id).label("races_completed"),
-            func.min(RaceResult.position).label("best_position")
-        ).where(RaceResult.user_id == user_id).where(RaceResult.position.isnot(None))
+    select(
+        func.count(RaceResult.id).label("races_completed"),
+        func.min(case((RaceResult.position > 0, RaceResult.position), else_=None)).label("best_position")  # ← только положительные
     )
+    .where(RaceResult.user_id == user_id)
+    .where(RaceResult.position.isnot(None))
+)
     stats = stats_q.one()
 
     return {
