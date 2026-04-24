@@ -12,4 +12,15 @@ async def get_leaderboard(session):
     stats_map = {
         row.user_id: {"races_completed": row.races_completed, "best_position": row.best_position} for row in stats_q}
 
-    return [{"position": idx + 1, "user_id": u.id, "email": u.email, "score": u.score, "avatar_url": u.avatar_url, **stats_map.get(u.id, {"races_completed": 0, "best_position": None}), } for idx, u in enumerate(users)]
+    return [
+    {
+        "position": idx + 1,
+        "user_id": u.id,
+        "email": u.email,
+        "score": u.score,
+        "avatar_url": u.avatar_url,
+        "nickname": u.nickname,  # ← добавить
+        **stats_map.get(u.id, {"races_completed": 0, "best_position": None}),
+    }
+    for idx, u in enumerate(users)
+]
