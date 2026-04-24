@@ -852,33 +852,25 @@
                     profilesMap[id] = extra[i].value;
                 });
               }
-              const rows = results.results
-                .map((r) => {
-                  const posLabel = formatPosition(r.position); // "DNS", "DSK" или число
-                  const posClass =
-                    r.position > 0 && r.position <= 3
-                      ? `p${r.position}`
-                      : "other";
-                  const pts = getPoints(r.position);
-                  const profile = profilesMap[r.user_id];
-                  const displayName =
-                    profile?.nickname || r.username.split("@")[0];
-                  const initials = displayName.slice(0, 2).toUpperCase();
-                  const avHtml = profile?.avatar_url
-                    ? `<div class="podium-av"><img src="${profile.avatar_url}" alt="${initials}" onerror="this.parentElement.textContent='${initials}'"/></div>`
-                    : `<div class="podium-av">${initials}</div>`;
-                  return `<div class="podium-row ${
-                    r.position <= 3 ? `p${r.position}` : ""
-                  }">
-            <div class="podium-pts ${pts === 0 ? "zero" : ""}">${pts > 0 ? `+${pts}` : pts < 0 ? pts : "—"}</div>
-            ${avHtml}
-            <div class="podium-name">${displayName}</div>
-            <div class="podium-pts ${pts === 0 ? "zero" : ""}">${
-                    pts > 0 ? `+${pts}` : "—"
-                  }</div>
-          </div>`;
-                })
-                .join("");
+              const rows = results.results.map((r) => {
+  const posLabel = formatPosition(r.position);
+  const posClass = r.position > 0 && r.position <= 3 ? `p${r.position}` : "other";
+  const rowClass = r.position > 0 && r.position <= 3 ? `p${r.position}` : "";
+  const pts = getPoints(r.position);
+  const profile = profilesMap[r.user_id];
+  const displayName = profile?.nickname || r.username.split("@")[0];
+  const initials = displayName.slice(0, 2).toUpperCase();
+  const avHtml = profile?.avatar_url
+    ? `<div class="podium-av"><img src="${profile.avatar_url}" alt="${initials}" onerror="this.parentElement.textContent='${initials}'"/></div>`
+    : `<div class="podium-av">${initials}</div>`;
+
+  return `<div class="podium-row ${rowClass}">
+    <div class="podium-pos ${posClass}">${posLabel}</div>
+    ${avHtml}
+    <div class="podium-name">${displayName}</div>
+    <div class="podium-pts ${pts >= 0 ? "" : "zero"}">${pts > 0 ? `+${pts}` : pts < 0 ? pts : "—"}</div>
+  </div>`;
+}).join("");
               sidebarHtml += `
           <div class="rd-card anim">
             <div class="rd-card-head"><div class="rd-card-head-icon">🏆</div>Результаты</div>
@@ -1034,7 +1026,7 @@
                 return `<div style="display:flex;align-items:center;gap:12px;padding:12px;background:var(--surface2);border-radius:8px;border:1px solid var(--border);">
           <div style="flex:1;font-size:14px;">${displayName}</div>
           <select class="form-input" style="width:100px;" data-user-id="${
-            p.user_id
+            x.user_id
           }">
   <option value="">—</option>
   ${Array.from(
@@ -1053,7 +1045,7 @@
 
       async function saveResults() {
         const inputs = document.querySelectorAll(
-          "#results-form-container input[data-user-id]"
+          "#results-form-container select[data-user-id]"
         );
         const results = [];
         const positions = new Set();
