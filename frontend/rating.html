@@ -56,7 +56,8 @@ async function init() {
 
 async function loadLeaderboard() {
   try {
-    const users = await api.getLeaderboard();
+    const allUsers = await api.getLeaderboard();
+    const users = allUsers.filter(u => u.score !== -1 && u.score !== -2); // <-- фильтр
     document.getElementById("leaderboard-count").textContent = `${users.length} ${pluralize(users.length, "пилот", "пилота", "пилотов")}`;
     const tbody = document.getElementById("leaderboard-tbody");
     if (!users.length) { tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:3rem;">Нет данных</td></tr>'; return; }
