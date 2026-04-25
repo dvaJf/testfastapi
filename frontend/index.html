@@ -467,38 +467,35 @@
         }
       }
 
-      async function openResultsModal(raceId) {
-        try {
-          const participants = await api.getRaceParticipants(raceId);
-          window._resultsRaceId = raceId;
-          let html =
-            participants.length === 0
-              ? '<p style="color:var(--text3);text-align:center;padding:2rem;">Нет зарегистрированных участников</p>'
-              : '<div style="display:flex;flex-direction:column;gap:10px;">' +
-                participants
-                  .map(
-                    (p) => `
-                    <div style="display:flex;align-items:center;gap:12px;padding:12px;background:var(--surface2);border-radius:8px;border:1px solid var(--border);">
-                      <div style="flex:1;font-size:14px;">${p.username}</div>
-                      <select class="form-input" style="width:100px;text-align:center;" data-user-id="${p.user_id}">
-  <option value="">—</option>
-  ${Array.from({length:20},(_,i)=>`<option value="${i+1}">${i+1}</option>`).join('')}
+      async function openResultsModal() {
+    const p = await api.getRaceParticipants(raceId);
+    document.getElementById("results-form-container").innerHTML = !p.length
+      ? '<p style="color:var(--text3);text-align:center;padding:2rem;">Нет участников</p>'
+      : '<div style="display:flex;flex-direction:column;gap:10px;">' +
+        p
+          .map((x) => {
+            const profile = profilesMap[x.user_id];
+            const displayName =
+              profile?.nickname || x.username.split("@")[0];
+            return `<div style="display:flex;align-items:center;gap:12px;padding:12px;background:var(--surface2);border-radius:8px;border:1px solid var(--border);">
+      <div style="flex:1;font-size:14px;">${displayName}</div>
+      <select class="form-input" style="width:100px;" data-user-id="${x.user_id}">
+<option value="">—</option>
+${Array.from({length:20},(_,i)=>`<option value="${i+1}">${i+1}</option>`).join('')}
 <option value="21">DNS</option>
 <option value="22">DSK</option>
 </select>
-                    </div>`
-                  )
-                  .join("") +
-                "</div>";
-          document.getElementById("results-form-container").innerHTML = html;
-          openModal("modal-results");
-        } catch (e) {
-          showToast(e.message, true);
-        }
-      }
+    </div>`;
+          })
+          .join("") +
+        "</div>";
+    openModal("modal-results");
+  }
 
-      async function saveResults() {
-    const inputs = document.querySelectorAll("#results-form-container select[data-user-id]");
+async function saveResults() {
+    const inputs = document.querySelectorAll(
+      "#results-form-container select[data-user-id]"
+    );
     const results = [];
     for (const input of inputs) {
       const userId = parseInt(input.dataset.userId);
@@ -507,12 +504,15 @@
         results.push({ user_id: userId, position });
       }
     }
-    if (!results.length) { showToast("Укажите хотя бы один результат", true); return; }
+    if (!results.length) {
+      showToast("Укажите хотя бы один результат", true);
+      return;
+    }
     try {
-      await api.setRaceResults(window._resultsRaceId, results);
+      await api.setRaceResults(raceId, results);
       closeModal("modal-results");
       showToast("Результаты сохранены!");
-      await loadRaces();
+      await loadRace();
     } catch (e) {
       showToast(e.message, true);
     }
