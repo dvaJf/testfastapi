@@ -1014,63 +1014,55 @@
       }
 
       async function openResultsModal() {
-        const p = await api.getRaceParticipants(raceId);
-        document.getElementById("results-form-container").innerHTML = !p.length
-          ? '<p style="color:var(--text3);text-align:center;padding:2rem;">Нет участников</p>'
-          : '<div style="display:flex;flex-direction:column;gap:10px;">' +
-            p
-              .map((x) => {
-                const profile = profilesMap[x.user_id];
-                const displayName =
-                  profile?.nickname || x.username.split("@")[0];
-                return `<div style="display:flex;align-items:center;gap:12px;padding:12px;background:var(--surface2);border-radius:8px;border:1px solid var(--border);">
-          <div style="flex:1;font-size:14px;">${displayName}</div>
-          <select class="form-input" style="width:100px;" data-user-id="${
-            x.user_id
-          }">
-  <option value="">—</option>
-  ${Array.from({length:20},(_,i)=>`<option value="${i+1}">${i+1}</option>`).join('')}
+    const p = await api.getRaceParticipants(raceId);
+    document.getElementById("results-form-container").innerHTML = !p.length
+      ? '<p style="color:var(--text3);text-align:center;padding:2rem;">Нет участников</p>'
+      : '<div style="display:flex;flex-direction:column;gap:10px;">' +
+        p
+          .map((x) => {
+            const profile = profilesMap[x.user_id];
+            const displayName =
+              profile?.nickname || x.username.split("@")[0];
+            return `<div style="display:flex;align-items:center;gap:12px;padding:12px;background:var(--surface2);border-radius:8px;border:1px solid var(--border);">
+      <div style="flex:1;font-size:14px;">${displayName}</div>
+      <select class="form-input" style="width:100px;" data-user-id="${x.user_id}">
+<option value="">—</option>
+${Array.from({length:20},(_,i)=>`<option value="${i+1}">${i+1}</option>`).join('')}
 <option value="21">DNS</option>
 <option value="22">DSK</option>
 </select>
-        </div>`;
-              })
-              .join("") +
-            "</div>";
-        openModal("modal-results");
-      }
+    </div>`;
+          })
+          .join("") +
+        "</div>";
+    openModal("modal-results");
+  }
 
-      async function saveResults() {
-        const inputs = document.querySelectorAll(
-          "#results-form-container select[data-user-id]"
-        );
-        const results = [];
-        const positions = new Set();
-        for (const input of inputs) {
-          const userId = parseInt(input.dataset.userId);
-          const position = input.value !== "" ? parseInt(input.value) : null;
-          if (position !== null && !isNaN(position)) {
-            if (positions.has(position)) {
-              showToast("Позиции должны быть уникальными", true);
-              return;
-            }
-            positions.add(position);
-            results.push({ user_id: userId, position });
-          }
-        }
-        if (!results.length) {
-          showToast("Укажите хотя бы один результат", true);
-          return;
-        }
-        try {
-          await api.setRaceResults(raceId, results);
-          closeModal("modal-results");
-          showToast("Результаты сохранены!");
-          await loadRace();
-        } catch (e) {
-          showToast(e.message, true);
-        }
+async function saveResults() {
+    const inputs = document.querySelectorAll(
+      "#results-form-container select[data-user-id]"
+    );
+    const results = [];
+    for (const input of inputs) {
+      const userId = parseInt(input.dataset.userId);
+      const position = input.value !== "" ? parseInt(input.value) : null;
+      if (position !== null && !isNaN(position)) {
+        results.push({ user_id: userId, position });
       }
+    }
+    if (!results.length) {
+      showToast("Укажите хотя бы один результат", true);
+      return;
+    }
+    try {
+      await api.setRaceResults(raceId, results);
+      closeModal("modal-results");
+      showToast("Результаты сохранены!");
+      await loadRace();
+    } catch (e) {
+      showToast(e.message, true);
+    }
+  }
 
       function onLoginSuccess() {
         loadRace();
