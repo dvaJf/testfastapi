@@ -133,14 +133,6 @@ async def set_results(race_id: int, results: list, session: AsyncSession):
     if race.status != "Завершена":
         raise BadRequestException()
 
-    # Проверяем уникальность позиций ТОЛЬКО среди финишировавших (position > 0).
-    # DNS (-1) и DSQ (-2) могут повторяться у нескольких пилотов.
-    # Проверяем уникальность позиций ТОЛЬКО среди финишировавших (1-20).
-# DNS (21) и DSK (22) и DNF (23) могут повторяться у нескольких пилотов.
-    finish_positions = [r.position for r in results if 1 <= r.position <= 20]
-    if len(finish_positions) != len(set(finish_positions)):
-        raise BadRequestException(detail="Позиции финишировавших участников должны быть уникальными")
-
     # Загружаем всех зарегистрированных участников
     existing_q = await session.execute(
         select(RaceResult).where(RaceResult.race_id == race_id)
@@ -157,7 +149,6 @@ async def set_results(race_id: int, results: list, session: AsyncSession):
             )
 
     # Откатываем старые очки ТОЛЬКО для пользователей из нового списка результатов.
-    # Это не затрагивает пользователей, которых нет в текущей отправке.
     if race.scores_awarded:
         for item in results:
             rr = existing_map.get(item.user_id)
@@ -174,7 +165,7 @@ async def set_results(race_id: int, results: list, session: AsyncSession):
     for item in results:
         existing_map[item.user_id].position = item.position
 
-    # Начисляем новые очки (включая отрицательные за DNS/DSQ)
+    # Начисляем новые очки
     for item in results:
         pts = points_for_position(item.position)
         if pts != 0:

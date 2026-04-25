@@ -498,28 +498,25 @@
       }
 
       async function saveResults() {
-        const inputs = document.querySelectorAll("#results-form-container select[data-user-id]");
-        const results = [];
-        const positions = new Set();
-        for (const input of inputs) {
-          const userId = parseInt(input.dataset.userId);
-          const position = input.value !== "" ? parseInt(input.value) : null;
-          if (position !== null && !isNaN(position)) {
-            if (position > 0 && positions.has(position)) { showToast("Позиции должны быть уникальными", true); return; }
-            positions.add(position);
-            results.push({ user_id: userId, position });
-          }
-        }
-        if (!results.length) { showToast("Укажите хотя бы один результат", true); return; }
-        try {
-          await api.setRaceResults(window._resultsRaceId, results);
-          closeModal("modal-results");
-          showToast("Результаты сохранены!");
-          await loadRaces();
-        } catch (e) {
-          showToast(e.message, true);
-        }
+    const inputs = document.querySelectorAll("#results-form-container select[data-user-id]");
+    const results = [];
+    for (const input of inputs) {
+      const userId = parseInt(input.dataset.userId);
+      const position = input.value !== "" ? parseInt(input.value) : null;
+      if (position !== null && !isNaN(position)) {
+        results.push({ user_id: userId, position });
       }
+    }
+    if (!results.length) { showToast("Укажите хотя бы один результат", true); return; }
+    try {
+      await api.setRaceResults(window._resultsRaceId, results);
+      closeModal("modal-results");
+      showToast("Результаты сохранены!");
+      await loadRaces();
+    } catch (e) {
+      showToast(e.message, true);
+    }
+  }
 
       function updateAdminStats() {
         if (!currentUser?.is_superuser) return;
