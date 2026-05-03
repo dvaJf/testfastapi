@@ -16,9 +16,11 @@ router = APIRouter()
 
 @router.get("/", response_model=List[NewsShort])
 async def list_news(
+    skip: int = 0,
+    limit: int = 20,
     session: AsyncSession = Depends(get_session),
 ):
-    news_list = await service.get_all_news(session)
+    news_list = await service.get_all_news(session, skip=skip, limit=limit)
     return news_list
 
 

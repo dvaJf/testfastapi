@@ -1,6 +1,7 @@
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
@@ -8,6 +9,7 @@ from src.auth.router import router as auth_router
 from src.races.router import router as races_router
 from src.news.router import router as news_router
 from src.leaderboard.router import router as leaderboard_router
+from src.bets.router import router as bets_router
 from src.auth.utils import create_first_admin
 from src.config import settings
 from src.database import engine, Base
@@ -65,66 +67,93 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(lifespan=lifespan)
-app.add_middleware(DiscordOAuthRedirectMiddleware)
+# Configure CORS based on environment
+if settings.ENVIRONMENT == "production":
+    # In production, restrict origins to your frontend domain
+    origins = [
+        settings.FRONTEND_URL,
+        # Add other production origins as needed
+    ]
+else:
+    # In development, allow all origins for convenience
+    origins = ["*"]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+app.add_middleware(GZipMiddleware, minimum_size=1000)
 app.add_middleware(DiscordOAuthRedirectMiddleware)
 # API routers
 
 
+import os
+from pathlib import Path
+
+# Get the base directory for more reliable path resolution
+BASE_DIR = Path(__file__).resolve().parent.parent
+FRONTEND_DIR = BASE_DIR / "frontend"
+
 # Static files (CSS, JS assets)
-app.mount("/static", StaticFiles(directory="frontend"), name="static")
+app.mount("/static", StaticFiles(directory=FRONTEND_DIR), name="static")
 
 
 # ==========================================
 # PAGE ROUTES
 # ==========================================
 
-@app.get("/")
+@app.get("/", include_in_schema=False)
 async def serve_index():
-    return FileResponse("frontend/index.html")
+    return FileResponse(FRONTEND_DIR / "index.html")
+
+@app.get("/api/health", include_in_schema=False)
+async def health_check():
+    return {"status": "healthy"}
 
 
-@app.get("/news")
+@app.get("/news", include_in_schema=False)
 async def serve_news():
-    return FileResponse("frontend/news.html")
+    return FileResponse(FRONTEND_DIR / "news.html")
 
 
-@app.get("/news/{news_id:int}")
+@app.get("/news/{news_id:int}", include_in_schema=False)
 async def serve_news_detail(news_id: int):
-    return FileResponse("frontend/news-detail.html")
+    return FileResponse(FRONTEND_DIR / "news-detail.html")
 
 
-@app.get("/races/{race_id:int}")
+@app.get("/races/{race_id:int}", include_in_schema=False)
 async def serve_race_detail(race_id: int):
-    return FileResponse("frontend/race-detail.html")
+    return FileResponse(FRONTEND_DIR / "race-detail.html")
 
 
-@app.get("/download")
+@app.get("/download", include_in_schema=False)
 async def serve_download():
-    return FileResponse("frontend/download.html")
+    return FileResponse(FRONTEND_DIR / "download.html")
 
 
-@app.get("/rating")
+@app.get("/rating", include_in_schema=False)
 async def serve_rating():
-    return FileResponse("frontend/rating.html")
+    return FileResponse(FRONTEND_DIR / "rating.html")
 
 
-@app.get("/info")
+@app.get("/info", include_in_schema=False)
 async def serve_info():
-    return FileResponse("frontend/info.html")
+    return FileResponse(FRONTEND_DIR / "info.html")
 
 
-@app.get("/profile")
+@app.get("/profile", include_in_schema=False)
 async def serve_profile():
-    return FileResponse("frontend/profile.html")
+    return FileResponse(FRONTEND_DIR / "profile.html")
+
+@app.get("/bets", include_in_schema=False)
+async def serve_bets():
+    return FileResponse(FRONTEND_DIR / "bets.html")
 
 app.include_router(leaderboard_router, prefix="/api/auth/users", tags=["leaderboard"])
+app.include_router(bets_router, prefix="/api/bets", tags=["bets"])
 app.include_router(auth_router,        prefix="/api/auth")
 app.include_router(races_router,       prefix="/api/races",      tags=["races"])
 app.include_router(news_router,        prefix="/api/news",       tags=["news"])

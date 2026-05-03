@@ -3,10 +3,10 @@ from sqlalchemy import select, desc
 from typing import Optional, List
 from src.news.models import News
 from src.exceptions import NotFoundException
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 
-async def get_all_news(session: AsyncSession) -> List[News]:
-    query = select(News).order_by(desc(News.created_at))
+async def get_all_news(session: AsyncSession, skip: int = 0, limit: int = 20) -> List[News]:
+    query = select(News).order_by(desc(News.created_at)).offset(skip).limit(limit)
     result = await session.execute(query)
     return result.scalars().all()
 
@@ -33,7 +33,7 @@ async def create_news(
         summary=summary,
         image_url=image_url,
         created_by=created_by,
-        created_at=datetime.utcnow()+timedelta(hours=3)
+        created_at=datetime.now(UTC)
     )
     session.add(news)
     await session.commit()

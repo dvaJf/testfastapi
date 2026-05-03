@@ -2,13 +2,13 @@
 // CONFIGURATION
 // ==========================================
 const CONFIG = {
-  API_URL: "https://f1u.vercel.app/api",
+  API_URL: "http://127.0.0.1:8000/api",
   TOKEN_KEY: "f1_access_token",
 };
 
 // ==========================================
 // API SERVICE
-
+// ==========================================
 class ApiService {
   constructor() { this.baseUrl = CONFIG.API_URL; }
   getToken() { return localStorage.getItem(CONFIG.TOKEN_KEY); }
@@ -54,8 +54,8 @@ class ApiService {
     return data;
   }
   async updateMyProfile(data) {
-  return this.request('/auth/users/me', { method: 'PATCH', body: data });
-}
+    return this.request('/auth/users/me', { method: 'PATCH', body: data });
+  }
   async getPublicProfile(userId) { return this.request(`/auth/users/${userId}/public`); }
   async register(email, password) { return this.request("/auth/register", { method: "POST", body: { email, password } }); }
   async getCurrentUser() { return this.request("/auth/users/me"); }
@@ -76,6 +76,15 @@ class ApiService {
   async createNews(data) { return this.request("/news/", { method: "POST", body: data }); }
   async updateNews(id, data) { return this.request(`/news/${id}`, { method: "PATCH", body: data }); }
   async deleteNews(id) { return this.request(`/news/${id}`, { method: "DELETE" }); }
+  // Betting API methods
+  async getBets() { return this.request("/bets/"); }
+  async getBet(id) { return this.request(`/bets/${id}`); }
+  async createBet(data) { return this.request("/bets/", { method: "POST", body: data }); }
+  async updateBet(id, data) { return this.request(`/bets/${id}`, { method: "PATCH", body: data }); }
+  async deleteBet(id) { return this.request(`/bets/${id}`, { method: "DELETE" }); }
+  async placeBet(betId, data) { return this.request(`/bets/${betId}/bet`, { method: "POST", body: data }); }
+  async resolveBet(betId, data) { return this.request(`/bets/${betId}/resolve`, { method: "POST", body: data }); }
+  async getMyBets() { return this.request("/bets/user/my-bets"); }
 }
 
 const api = new ApiService();
@@ -124,17 +133,15 @@ function getStatusClass(status) {
 // AUTH
 // ==========================================
 async function initAuth() {
-  // Проверяем токен из URL после Discord redirect
   const params = new URLSearchParams(window.location.search);
   const token = params.get('access_token');
   if (token) {
     api.setToken(token);
-    // Убираем токен из URL
     window.history.replaceState({}, '', window.location.pathname);
   }
 
   if (api.getToken()) {
-    try { currentUser = await api.getCurrentUser(); } 
+    try { currentUser = await api.getCurrentUser(); }
     catch (e) { api.removeToken(); currentUser = null; }
   }
   updateAuthUI();
@@ -173,9 +180,6 @@ function logout() {
   setTimeout(() => window.location.href = "/", 800);
 }
 function loginWithDiscord() {
-  // Открываем Discord OAuth в этом же окне
-  // После авторизации Discord редиректит на /api/auth/discord/callback
-  // FastAPI Users обрабатывает callback и редиректит на фронт с токеном
   window.location.href = '/api/auth/discord/authorize';
 }
 function openAuthModal(tab = "login") { switchAuthTab(tab); openModal("modal-auth"); }
@@ -236,7 +240,6 @@ async function handleResetPassword(e) { e.preventDefault(); showToast("Функ�
 // ==========================================
 function getDisplayName(user) {
   if (!user) return '—';
-  // Приоритет: nickname → email без @discord.local → email
   if (user.nickname) return user.nickname;
   if (user.email && !user.email.endsWith('@discord.local')) return user.email;
   if (user.email) return user.email.replace('@discord.local', '');
@@ -249,14 +252,14 @@ async function handleEditProfile(e) {
   e.preventDefault();
   const btn = document.getElementById("btn-submit-profile");
   const nickname = document.getElementById("edit-nickname").value.trim();
-  
+
   if (nickname.length > 20) {
     const el = document.getElementById("error-edit-profile");
     el.textContent = "Никнейм не может быть длиннее 20 символов";
     el.classList.add("visible");
     return;
   }
-  
+
   btn.disabled = true;
   try {
     const data = {
@@ -264,21 +267,20 @@ async function handleEditProfile(e) {
       description: document.getElementById("edit-description").value || null,
       avatar_url: document.getElementById("edit-avatar-url").value || null,
     };
-    
+
     const updated = await api.updateMyProfile(data);
     currentUser = { ...currentUser, ...updated };
     closeModal("modal-edit-profile");
     showToast("Профиль обновлён!");
-    
-    // Перезагружаем прфиль если есть функция
+
     if (typeof loadProfile === "function") await loadProfile();
     else window.location.reload();
   } catch(e) {
     const el = document.getElementById("error-edit-profile");
-    el.textContent = e.message || "Ошибка обновления"; 
+    el.textContent = e.message || "Ошибка обновления";
     el.classList.add("visible");
-  } finally { 
-    btn.disabled = false; 
+  } finally {
+    btn.disabled = false;
   }
 }
 
@@ -312,6 +314,7 @@ function renderHeader(activePage) {
       ${[
         ['/', 'home', 'Главная'],
         ['/news', 'news', 'Новости'],
+        ['/bets', 'bets', 'Ставки'],
         ['/download', 'download', 'Скачать'],
         ['/rating', 'rating', 'Рейтинг пилотов'],
         ['/info', 'info', 'Информация'],
@@ -361,7 +364,7 @@ function injectAuthModal() {
               <label class="form-label">Пароль</label>
               <input class="form-input" type="password" name="password" placeholder="••••••••" required minlength="6"/>
             </div>
-           
+
             <button type="submit" class="btn btn-red" style="width:100%" id="btn-submit-login">Войти</button>
             <div class="form-footer">Нет аккаунта? <a onclick="switchAuthTab('signup')">Зарегистрироваться</a></div>
           </form>
@@ -382,7 +385,7 @@ function injectAuthModal() {
                 <input class="form-input" type="password" name="password2" placeholder="••••••••" required minlength="6"/>
               </div>
             </div>
-            
+
             <div class="form-error" id="error-signup-general"></div>
             <button type="submit" class="btn btn-red" style="width:100%" id="btn-submit-signup">Создать аккаунт</button>
             <div class="form-footer">Уже есть аккаунт? <a onclick="switchAuthTab('login')">Войти</a></div>

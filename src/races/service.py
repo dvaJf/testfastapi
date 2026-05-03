@@ -8,7 +8,7 @@ from typing import Optional
 from src.exceptions import *
 
 # Позиции: положительные = очки за финиш, отрицательные = DNS/DSQ
-pos = {
+POSITION_POINTS = {
     1: 60, 2: 55, 3: 50, 4: 47, 5: 44, 6: 42, 7: 40, 8: 38, 9: 35, 10: 32,
     11: 28, 12: 25, 13: 22, 14: 20, 15: 18, 16: 16, 17: 13, 18: 10, 19: 5, 20: 0,
     21: -30,  # DNS (было -1)
@@ -17,10 +17,11 @@ pos = {
 }
 
 def points_for_position(position: int) -> int:
-    return pos.get(position, 0)
+    """Get points for a given position."""
+    return POSITION_POINTS.get(position, 0)
 
 def is_special_position(position: int) -> bool:
-    """DNS (21) и DSK (22) — специальные позиции, не финиш."""
+    """Check if position is DNS (21) or DSK (22) - special non-finish positions."""
     return position in (21, 22)
 
 async def get_all_races_with_creator(session: AsyncSession):
@@ -147,6 +148,11 @@ async def set_results(race_id: int, results: list, session: AsyncSession):
             raise BadRequestException(
                 detail=f"Пользователь {item.user_id} не зарегистрирован в этой гонке"
             )
+
+    # Проверяем уникальность позиций (кроме отрицательных)
+    positions = [item.position for item in results if item.position > 0]
+    if len(positions) != len(set(positions)):
+        raise BadRequestException(detail="Позиции должны быть уникальными")
 
     # Откатываем старые очки ТОЛЬКО для пользователей из нового списка результатов.
     if race.scores_awarded:

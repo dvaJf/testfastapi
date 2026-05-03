@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python *)",
+      "Bash(venv\\\\Scripts\\\\python *)",
+      "Bash(.\\\\venv\\\\Scripts\\\\python *)",
+      "Bash(venv\\\\Scripts\\\\activate)",
+      "Bash(D:\\\\proeckts\\\\fastapi\\\\testfastapi\\\\venv\\\\Scripts\\\\python.exe *)",
+      "Bash(/mnt/d/proeckts/fastapi/testfastapi/venv/Scripts/python.exe *)",
+      "Bash(pip list *)",
+      "Bash(D:\\\\proeckts\\\\fastapi\\\\testfastapi\\\\venv\\\\Scripts\\\\pip list *)",
+      "Bash(venv/Scripts/python.exe *)"
+    ]
+  }
+}

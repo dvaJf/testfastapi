@@ -12,13 +12,21 @@ router = APIRouter()
 @router.get("/", response_model=list[RaceShort])
 async def list_races(session: AsyncSession = Depends(get_session)):
     races = await service.get_all_races_with_creator(session)
+    if not races:
+        return []
     organizer_ids = list({r.created_by for r in races})
     ratings = await service.get_organizer_ratings_bulk(organizer_ids, session)
-    result = []
-    for race in races:
-        r = ratings.get(race.created_by, {"likes": 0, "dislikes": 0})
-        result.append(RaceShort.model_validate({"id": race.id, "name": race.name, "race": race.race, "time": race.time, "status": race.status, "maxuser": race.maxuser, "users": race.users, "created_by": race.created_by, "creator_email": race.creator.email if race.creator else None, "organizer_likes": r["likes"], "organizer_dislikes": r["dislikes"]}))
-    return result
+    return [
+        RaceShort.model_validate({
+            "id": race.id, "name": race.name, "race": race.race,
+            "time": race.time, "status": race.status, "maxuser": race.maxuser,
+            "users": race.users, "created_by": race.created_by,
+            "creator_email": race.creator.email if race.creator else None,
+            "organizer_likes": ratings.get(race.created_by, {}).get("likes", 0),
+            "organizer_dislikes": ratings.get(race.created_by, {}).get("dislikes", 0)
+        })
+        for race in races
+    ]
 
 @router.post("/", response_model=RaceOut, status_code=status.HTTP_201_CREATED)
 async def create_race(race_data: RaceCreate, user: User = Depends(current_user), session: AsyncSession = Depends(get_session),):

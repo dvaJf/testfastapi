@@ -11,7 +11,8 @@ class Settings(BaseSettings):
     DISCORD_CLIENT_SECRET: str
     FRONTEND_URL: str = "http://127.0.0.1:8000"
     API_BASE_URL: str = "http://127.0.0.1:8000/api"
-    
+    ENVIRONMENT: str = "development"
+
     model_config = SettingsConfigDict(env_file=".env")
 
 settings = Settings()
@@ -19,3 +20,4 @@ settings = Settings()
 if os.getenv("VERCEL"):
     settings.FRONTEND_URL = "https://f1u.vercel.app"
     settings.API_BASE_URL = "https://f1u.vercel.app/api"
+    settings.ENVIRONMENT = "production"

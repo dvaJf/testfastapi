@@ -1,59 +1,53 @@
-from sqlalchemy import select, func
+from sqlalchemy import select, func, case
+from sqlalchemy.orm import selectinload
 from src.auth.models import User
 from src.races.models import RaceResult
 
 
-async def get_leaderboard(session):
-    # Загружаем всех пользователей
-    users_q = await session.execute(select(User))
-    users = users_q.scalars().all()
-
-    # Все гонки с результатом (для подсчёта количества)
-    count_q = await session.execute(
+async def get_leaderboard(session, limit: int = 100):
+    # Оптимизированный запрос с агрегацией в БД
+    query = (
         select(
-            RaceResult.user_id,
-            func.count(RaceResult.id).label("races_completed")
+            User.id,
+            User.email,
+            User.score,
+            User.avatar_url,
+            User.nickname,
+            func.count(RaceResult.id).label("races_completed"),
+            func.min(
+                case(
+                    (RaceResult.position.between(1, 20), RaceResult.position),
+                    else_=None
+                )
+            ).label("best_position")
         )
-        .where(RaceResult.position.isnot(None))
-        .group_by(RaceResult.user_id)
+        .outerjoin(RaceResult, (RaceResult.user_id == User.id) & (RaceResult.position.isnot(None)))
+        .group_by(User.id, User.email, User.score, User.avatar_url, User.nickname)
+        .having(func.count(RaceResult.id) >= 1)
+        .order_by(
+            (User.score / func.nullif(func.count(RaceResult.id), 0)).desc(),
+            User.score.desc()
+        )
+        .limit(limit)
     )
-    count_map = {row.user_id: row.races_completed for row in count_q}
 
-    # Лучшая позиция только среди реальных финишей (> 0)
-    best_q = await session.execute(
-    select(
-        RaceResult.user_id,
-        func.min(RaceResult.position).label("best_position")
-    )
-    .where(RaceResult.position.isnot(None))
-    .where(RaceResult.position.between(1, 20))  # только реальные финиши
-    .group_by(RaceResult.user_id)
-)
-    best_map = {row.user_id: row.best_position for row in best_q}
+    result = await session.execute(query)
+    rows = result.all()
 
-    # Собираем записи только для пилотов с 5+ гонками, считаем среднее
     entries = []
-    for u in users:
-        races_completed = count_map.get(u.id, 0) or 0
-        if races_completed < 1:
-            continue
-        avg_score = round(u.score / races_completed, 2) if races_completed > 0 else 0.0
+    for idx, row in enumerate(rows, 1):
+        races_completed = row.races_completed or 0
+        avg_score = round(row.score / races_completed, 2) if races_completed > 0 else 0.0
         entries.append({
-            "user_id": u.id,
-            "email": u.email,
-            "score": u.score,
-            "avatar_url": u.avatar_url,
-            "nickname": u.nickname,
+            "user_id": row.id,
+            "email": row.email,
+            "score": row.score,
+            "avatar_url": row.avatar_url,
+            "nickname": row.nickname,
             "races_completed": races_completed,
-            "best_position": best_map.get(u.id),
+            "best_position": row.best_position,
             "avg_score": avg_score,
+            "position": idx,
         })
-
-    # Сортируем по среднему очку за гонку (убывание)
-    entries.sort(key=lambda x: (-x["avg_score"], -x["score"], x["best_position"] or 999))
-
-    # Проставляем позиции
-    for idx, entry in enumerate(entries):
-        entry["position"] = idx + 1
 
     return entries

@@ -22,12 +22,14 @@ async def get_user_db(session: AsyncSession = Depends(get_session)):
 class UserManager(IntegerIDMixin, BaseUserManager[User, int]):
     reset_password_token_secret = SECRET
     verification_token_secret = SECRET
-    
-    # Отключаем валидацию email
+
     async def validate_password(self, password: str, user) -> None:
-        # Минимальная валидация пароля
-        if len(password) < 3:
-            raise ValueError("Пароль слишком короткий")
+        if len(password) < 8:
+            raise ValueError("Пароль должен содержать минимум 8 символов")
+        if password.isdigit():
+            raise ValueError("Пароль не может состоять только из цифр")
+        if password.isalpha():
+            raise ValueError("Пароль должен содержать не только буквы")
     
     async def create(self, user_create, safe: bool = False, request=None):
         # Переопределяем создание, чтобы не валидировать email

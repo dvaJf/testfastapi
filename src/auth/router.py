@@ -67,7 +67,7 @@ async def discord_callback(code: str | None = None):
         )
         
         if token_resp.status_code != 200:
-            raise HTTPException(status_code=400, detail="Discord token exchange failed")
+            raise HTTPException(status_code=400, detail="Ошибка авторизации через Discord")
         
         discord_access_token = token_resp.json()["access_token"]
         
@@ -77,7 +77,7 @@ async def discord_callback(code: str | None = None):
         )
         
         if user_resp.status_code != 200:
-            raise HTTPException(status_code=400, detail="Failed to get Discord user")
+            raise HTTPException(status_code=400, detail="Ошибка получения данных пользователя Discord")
         
         discord_user = user_resp.json()
     

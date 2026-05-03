@@ -1,8 +1,10 @@
 import pytest_asyncio
 from httpx import AsyncClient, ASGITransport
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
+from sqlalchemy import update
 from src.database import Base, get_session
 from src.main import app
+from src.auth.models import User
 
 TEST_DATABASE_URL = "sqlite+aiosqlite:///./test_db.db"
 
@@ -44,19 +46,19 @@ async def client() -> AsyncClient:
 @pytest_asyncio.fixture
 async def registered_user(client):
     payload = {"email": "user@example.com", "password": "Password123!", "score": 0}
-    await client.post("/auth/register", json=payload)
-    login = await client.post("/auth/login", data={"username": "user@example.com", "password": "Password123!"})
+    resp = await client.post("/api/auth/register", json=payload)
+    print(f"Register response: {resp.status_code} {resp.json()}")
+    login = await client.post("/api/auth/login", data={"username": "user@example.com", "password": "Password123!"})
     token = login.json()["access_token"]
-    return {"email": "user@example.com", "token": token, "headers": {"Authorization": f"Bearer {token}"}}
-
+    me_resp = await client.get("/api/auth/users/me", headers={"Authorization": f"Bearer {token}"})
+    user_id = me_resp.json()["id"]
+    return {"email": "user@example.com", "token": token, "headers": {"Authorization": f"Bearer {token}"}, "id": user_id}
 
 @pytest_asyncio.fixture
 async def verified_user(registered_user):
     """Manually flip is_verified in the DB for the registered user."""
     async with test_session_maker() as session:
-        from sqlalchemy import update
-        from src.auth.models import User
-        await session.execute(update(User).where(User.email == registered_user["email"]).values(is_verified=True))
+        await session.execute(update(User).where(User.email == registered_user["email"]).values(is_verified=1, score=100))
         await session.commit()
     return registered_user
 
@@ -64,17 +66,20 @@ async def verified_user(registered_user):
 @pytest_asyncio.fixture
 async def superuser(client):
     payload = {"email": "admin@example.com", "password": "Admin123!", "score": 0}
-    await client.post("/auth/register", json=payload)
+    resp = await client.post("/api/auth/register", json=payload)
+    print(f"Register admin response: {resp.status_code} {resp.json()}")
     async with test_session_maker() as session:
-        from sqlalchemy import update
-        from src.auth.models import User
         await session.execute(
-            update(User).where(User.email == "admin@example.com").values(is_superuser=True, is_verified=True)
+            update(User).where(User.email == "admin@example.com").values(is_superuser=1, is_verified=1)
         )
         await session.commit()
-    login = await client.post("/auth/login", data={"username": "admin@example.com", "password": "Admin123!"})
+    login = await client.post("/api/auth/login", data={"username": "admin@example.com", "password": "Admin123!"})
+    print(f"Login response status: {login.status_code}")
+    print(f"Login response body: {login.json()}")
     token = login.json()["access_token"]
-    return {"email": "admin@example.com", "token": token, "headers": {"Authorization": f"Bearer {token}"}}
+    me_resp = await client.get("/api/auth/users/me", headers={"Authorization": f"Bearer {token}"})
+    user_id = me_resp.json()["id"]
+    return {"email": "admin@example.com", "token": token, "headers": {"Authorization": f"Bearer {token}"}, "id": user_id}
 
 
 @pytest_asyncio.fixture
@@ -87,6 +92,6 @@ async def sample_race(client, superuser):
         "maxuser": 5,
         "status": "Регистрация",
     }
-    resp = await client.post("/races/", json=payload, headers=superuser["headers"])
+    resp = await client.post("/api/races/", json=payload, headers=superuser["headers"])
     assert resp.status_code == 201
     return resp.json()
